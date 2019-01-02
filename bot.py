@@ -13,6 +13,7 @@ logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 last_user = None
 print_string = "######################\n[{0}] {1}, @{2} ({3}): {4}"
+last_user_string = "[{0}] {1}, @{2} (#user{3})"
 
 with open(file="config.json",
           encoding="utf-8") as f:
@@ -162,11 +163,9 @@ def MessagesAntiFlood(client: pyrogram.Client,
 def CMDGetLastUser(client: pyrogram.Client,
                    msg: pyrogram.Message):
     msg.reply(text=print_string.format(datetime.datetime.now().time(),
-                                       msg.from_user.first_name,
-                                       msg.from_user.username,
-                                       msg.from_user.id,
-                                       msg.text if not msg.media else ("MEDIA " + utils.ExtractMedia(msg=msg,
-                                                                                                     bigger_photo=True).file_id)),
+                                       last_user.first_name,
+                                       last_user.username,
+                                       last_user.id),
               disable_notification=False)
 
 
