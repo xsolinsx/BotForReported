@@ -148,11 +148,11 @@ def MessagesAntiFlood(client: pyrogram.Client,
         # do not process messages for flooders
         msg.stop_propagation()
     print(print_string.format(datetime.datetime.now().time(),
-                              str(msg.from_user.first_name),
-                              str(msg.from_user.username),
-                              str(msg.from_user.id),
-                              str(msg.text if not msg.media else ("MEDIA " + utils.ExtractMedia(msg=msg,
-                                                                                                bigger_photo=True).file_id))))
+                              msg.from_user.first_name,
+                              msg.from_user.username,
+                              msg.from_user.id,
+                              msg.text if not msg.media else ("MEDIA " + utils.ExtractMedia(msg=msg,
+                                                                                            bigger_photo=True).file_id)))
     global last_user
     last_user = msg.from_user
 
@@ -163,9 +163,9 @@ def MessagesAntiFlood(client: pyrogram.Client,
 def CMDGetLastUser(client: pyrogram.Client,
                    msg: pyrogram.Message):
     msg.reply(text=last_user_string.format(datetime.datetime.now().time(),
-                                           str(last_user.first_name),
-                                           str(last_user.username),
-                                           str(last_user.id)),
+                                           last_user.first_name,
+                                           last_user.username,
+                                           last_user.id),
               disable_notification=False)
 
 
