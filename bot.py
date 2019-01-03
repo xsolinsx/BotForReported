@@ -252,6 +252,12 @@ def CMDStart(client: pyrogram.Client,
                   disable_notification=False,
                   parse_mode=pyrogram.ParseMode.HTML)
     else:
+        msg.forward(chat_id=master.id,
+                    disable_notification=False)
+        app.send_message(chat_id=master.id,
+                         text="↑ (#user{0}) {1} ↑".format(msg.from_user.id,
+                                                          msg.from_user.first_name),
+                         disable_notification=True)
         msg.reply(text="Hi, use this bot to talk to {0} {1}, @{2} ({3})".format(master.first_name,
                                                                                 master.last_name,
                                                                                 master.username,
@@ -283,12 +289,6 @@ def BasicHandler(client: pyrogram.Client,
                          text="↑ (#user{0}) {1} ↑".format(msg.from_user.id,
                                                           msg.from_user.first_name),
                          disable_notification=True)
-        if msg.text == "/start":
-            msg.reply(text="Hi, use this bot to talk to {0} {1}, @{2} ({3})".format(master.first_name,
-                                                                                    master.last_name,
-                                                                                    master.username,
-                                                                                    master.id),
-                      disable_notification=False)
 
 
 app.idle()

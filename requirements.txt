@@ -1,2 +1,2 @@
-pyrogram[fast]==0.10.2
+pyrogram[fast]==0.10.3
 peewee
