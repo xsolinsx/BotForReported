@@ -76,7 +76,7 @@ def InstanceFloodId(chat_id: str):
         flood[chat_id]["warned"] = False
 
 
-@app.on_message(group=-2)
+@app.on_message(filters=pyrogram.Filters.private, group=-2)
 def MessagesAntiFlood(client: pyrogram.Client,
                       msg: pyrogram.Message):
     usr, created = User.get_or_create(id_=msg.from_user.id,
@@ -159,7 +159,40 @@ def MessagesAntiFlood(client: pyrogram.Client,
 # endregion
 
 
-@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command(command=["getlastuser", "getlast", "lastuser"], prefix=["/", "!", "#", "."]))
+@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command(command="test", prefix=["/", "!", "#", "."]))
+def CMDTestChat(client: pyrogram.Client,
+                msg: pyrogram.Message):
+    chats_to_test = list()
+    if msg.reply_to_message:
+        if msg.reply_to_message.forward_from:
+            chats_to_test.append(msg.reply_to_message.forward_from.id)
+        elif msg.reply_to_message.text.find("(#user") != -1:
+            chats_to_test.append(int(msg.reply_to_message.text[msg.reply_to_message.text.find(
+                "(#user") + 6: msg.reply_to_message.text.find(")")]))
+    else:
+        msg.command.remove(msg.command[0])
+        for cht in msg.command:
+            chats_to_test.append(cht)
+
+    txt = ""
+    for cht in chats_to_test:
+        try:
+            app.send_chat_action(chat_id=cht if not utils.IsInt(cht) else int(cht),
+                                 action=pyrogram.ChatAction.TYPING)
+            txt += "Can write to {0}\n".format(cht)
+        except pyrogram.api.errors.UserIsBlocked as ex:
+            txt += "{0} blocked me\n".format(cht)
+        except pyrogram.api.errors.PeerIdInvalid as ex:
+            txt += "Cannot write to {0}, never encountered.\n".format(cht)
+        except Exception as ex:
+            txt += "Cannot write to {0} {1}\n".format(cht,
+                                                      str(ex))
+
+    msg.reply(text=txt,
+              disable_notification=False)
+
+
+@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command(command="getlast", prefix=["/", "!", "#", "."]))
 def CMDGetLastUser(client: pyrogram.Client,
                    msg: pyrogram.Message):
     msg.reply(text=last_user_string.format(datetime.datetime.now().time(),
@@ -243,12 +276,13 @@ def CMDStart(client: pyrogram.Client,
     if msg.from_user.id == master.id:
         msg.reply(text="""<code>/start</code> Shows this message
 
+<code>/test {reply_from}|{chats}</code> Tests the specified chat(s)
+
 <code>/getlast</code> Sends last user's details
-<b>Alternatives</b>: <code>/getlastuser</code>, <code>/lastuser</code>
 
-<code>/block \{reply\}|\{users\}</code> Blocks the specified user(s)
+<code>/block {reply_from}|{users}</code> Blocks the specified user(s)
 
-<code>/unblock \{reply\}|\{users\}</code> Unblocks the specified user(s)""",
+<code>/unblock {reply_from}|{users}</code> Unblocks the specified user(s)""",
                   disable_notification=False,
                   parse_mode=pyrogram.ParseMode.HTML)
     else:
@@ -265,7 +299,7 @@ def CMDStart(client: pyrogram.Client,
                   disable_notification=False)
 
 
-@app.on_message()
+@app.on_message(filters=pyrogram.Filters.private)
 def BasicHandler(client: pyrogram.Client,
                  msg: pyrogram.Message):
     global last_user
@@ -277,8 +311,20 @@ def BasicHandler(client: pyrogram.Client,
                 last_user = app.get_chat(chat_id=int(msg.reply_to_message.text[msg.reply_to_message.text.find(
                     "(#user") + 6: msg.reply_to_message.text.find(")")]))
         if last_user:
-            msg.forward(chat_id=last_user.id,
-                        disable_notification=False)
+            try:
+                msg.forward(chat_id=last_user.id,
+                            disable_notification=False)
+                app.send_chat_action(chat_id=master.id,
+                                     action=pyrogram.ChatAction.TYPING)
+            except pyrogram.api.errors.UserIsBlocked as ex:
+                msg.reply(text="{0} blocked me.\n".format(last_user.id),
+                          disable_notification=False)
+            except pyrogram.api.errors.PeerIdInvalid as ex:
+                msg.reply(text="Cannot write to {0}, never encountered.\n".format(last_user.id),
+                          disable_notification=False)
+            except Exception as ex:
+                msg.reply(text=str(ex),
+                          disable_notification=False)
         else:
             msg.reply(text="Need to have last_user OR to reply to a forwarded message OR to reply to a message with the #user hashtag!",
                       disable_notification=False)
@@ -289,6 +335,8 @@ def BasicHandler(client: pyrogram.Client,
                          text="↑ (#user{0}) {1} ↑".format(msg.from_user.id,
                                                           msg.from_user.first_name),
                          disable_notification=True)
+        app.send_chat_action(chat_id=msg.from_user.id,
+                             action=pyrogram.ChatAction.TYPING)
 
 
 app.idle()
