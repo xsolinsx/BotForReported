@@ -323,7 +323,7 @@ def BasicHandler(client: pyrogram.Client,
                 msg.reply(text="Cannot write to {0}, never encountered.\n".format(last_user.id),
                           disable_notification=False)
             except Exception as ex:
-                msg.reply(text=str(ex),
+                msg.reply(text=ex,
                           disable_notification=False)
         else:
             msg.reply(text="Need to have last_user OR to reply to a forwarded message OR to reply to a message with the #user hashtag!",
