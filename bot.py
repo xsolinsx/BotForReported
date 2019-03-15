@@ -1,6 +1,8 @@
 import datetime
 import json
 import logging
+import os
+import sys
 import time
 
 import peewee
@@ -157,6 +159,14 @@ def MessagesAntiFlood(client: pyrogram.Client,
     last_user = msg.from_user
 
 # endregion
+
+
+@app.on_message(pyrogram.Filters.user(master.id) & pyrogram.Filters.command(command="reboot", prefix=["/", "!", "#", "."]))
+def CmdReboot(client: pyrogram.Client,
+              msg: pyrogram.Message):
+    python = sys.executable
+    db.close()
+    os.execl(python, python, *sys.argv)
 
 
 @app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command(command="test", prefix=["/", "!", "#", "."]))
@@ -339,4 +349,6 @@ def BasicHandler(client: pyrogram.Client,
                              action=pyrogram.ChatAction.TYPING)
 
 
+app.send_message(chat_id=master.id,
+                 text="Bot started!\n{0}".format(datetime.datetime.utcnow()))
 app.idle()
