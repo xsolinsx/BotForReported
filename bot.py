@@ -14,7 +14,7 @@ logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.ERROR)
 
 last_user = None
-print_string = "######################\n[{0}] {1}, @{2} ({3}): {4}"
+print_string = "[UTC {0}] {1}, @{2} ({3}): {4}\n"
 last_user_string = "[{0}] {1}, @{2} (#user{3})"
 
 with open(file="config.json",
@@ -24,9 +24,10 @@ if not config:
     exit()
 
 
-app = pyrogram.Client(session_name=config["telegram"]["bot_api_key"],
+app = pyrogram.Client(session_name="EricSolinasBot",
                       api_id=config["telegram"]["api_id"],
                       api_hash=config["telegram"]["api_hash"],
+                      bot_token=config["telegram"]["bot_api_key"],
                       workers=4)
 app.start()
 master = app.get_chat(chat_id=config["master"])
@@ -149,7 +150,7 @@ def MessagesAntiFlood(client: pyrogram.Client,
     else:
         # do not process messages for flooders
         msg.stop_propagation()
-    print(print_string.format(datetime.datetime.now().time(),
+    print(print_string.format(datetime.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
                               msg.from_user.first_name,
                               msg.from_user.username,
                               msg.from_user.id,
@@ -161,7 +162,7 @@ def MessagesAntiFlood(client: pyrogram.Client,
 # endregion
 
 
-@app.on_message(pyrogram.Filters.user(master.id) & pyrogram.Filters.command(command="reboot", prefix=["/", "!", "#", "."]))
+@app.on_message(pyrogram.Filters.user(master.id) & pyrogram.Filters.command("reboot", prefix=["/", "!", "#", "."]))
 def CmdReboot(client: pyrogram.Client,
               msg: pyrogram.Message):
     python = sys.executable
@@ -169,7 +170,7 @@ def CmdReboot(client: pyrogram.Client,
     os.execl(python, python, *sys.argv)
 
 
-@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command(command="test", prefix=["/", "!", "#", "."]))
+@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command("test", prefix=["/", "!", "#", "."]))
 def CMDTestChat(client: pyrogram.Client,
                 msg: pyrogram.Message):
     chats_to_test = list()
@@ -188,11 +189,11 @@ def CMDTestChat(client: pyrogram.Client,
     for cht in chats_to_test:
         try:
             app.send_chat_action(chat_id=cht if not utils.IsInt(cht) else int(cht),
-                                 action=pyrogram.ChatAction.TYPING)
+                                 action="typing")
             txt += "Can write to {0}\n".format(cht)
-        except pyrogram.api.errors.UserIsBlocked as ex:
+        except pyrogram.errors.UserIsBlocked as ex:
             txt += "{0} blocked me\n".format(cht)
-        except pyrogram.api.errors.PeerIdInvalid as ex:
+        except pyrogram.errors.PeerIdInvalid as ex:
             txt += "Cannot write to {0}, never encountered.\n".format(cht)
         except Exception as ex:
             txt += "Cannot write to {0} {1}\n".format(cht,
@@ -202,17 +203,17 @@ def CMDTestChat(client: pyrogram.Client,
               disable_notification=False)
 
 
-@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command(command="getlast", prefix=["/", "!", "#", "."]))
+@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command("getlast", prefix=["/", "!", "#", "."]))
 def CMDGetLastUser(client: pyrogram.Client,
                    msg: pyrogram.Message):
-    msg.reply(text=last_user_string.format(datetime.datetime.now().time(),
+    msg.reply(text=last_user_string.format(datetime.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
                                            last_user.first_name,
                                            last_user.username,
                                            last_user.id),
               disable_notification=False)
 
 
-@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command(command="block", prefix=["/", "!", "#", "."]))
+@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command("block", prefix=["/", "!", "#", "."]))
 def CMDBlock(client: pyrogram.Client,
              msg: pyrogram.Message):
     users_to_block = list()
@@ -246,7 +247,7 @@ def CMDBlock(client: pyrogram.Client,
               disable_notification=False)
 
 
-@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command(command="unblock", prefix=["/", "!", "#", "."]))
+@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command("unblock", prefix=["/", "!", "#", "."]))
 def CMDUnblock(client: pyrogram.Client,
                msg: pyrogram.Message):
     users_to_unblock = list()
@@ -280,7 +281,7 @@ def CMDUnblock(client: pyrogram.Client,
               disable_notification=False)
 
 
-@app.on_message(pyrogram.Filters.command(command="start", prefix=["/", "!", "#", "."]))
+@app.on_message(pyrogram.Filters.command("start", prefix=["/", "!", "#", "."]))
 def CMDStart(client: pyrogram.Client,
              msg: pyrogram.Message):
     if msg.from_user.id == master.id:
@@ -294,7 +295,7 @@ def CMDStart(client: pyrogram.Client,
 
 <code>/unblock {reply_from}|{users}</code> Unblocks the specified user(s)""",
                   disable_notification=False,
-                  parse_mode=pyrogram.ParseMode.HTML)
+                  parse_mode="html")
     else:
         msg.forward(chat_id=master.id,
                     disable_notification=False)
@@ -325,11 +326,11 @@ def BasicHandler(client: pyrogram.Client,
                 msg.forward(chat_id=last_user.id,
                             disable_notification=False)
                 app.send_chat_action(chat_id=master.id,
-                                     action=pyrogram.ChatAction.TYPING)
-            except pyrogram.api.errors.UserIsBlocked as ex:
+                                     action="typing")
+            except pyrogram.errors.UserIsBlocked as ex:
                 msg.reply(text="{0} blocked me.\n".format(last_user.id),
                           disable_notification=False)
-            except pyrogram.api.errors.PeerIdInvalid as ex:
+            except pyrogram.errors.PeerIdInvalid as ex:
                 msg.reply(text="Cannot write to {0}, never encountered.\n".format(last_user.id),
                           disable_notification=False)
             except Exception as ex:
@@ -346,9 +347,9 @@ def BasicHandler(client: pyrogram.Client,
                                                           msg.from_user.first_name),
                          disable_notification=True)
         app.send_chat_action(chat_id=msg.from_user.id,
-                             action=pyrogram.ChatAction.TYPING)
+                             action="typing")
 
 
 app.send_message(chat_id=master.id,
-                 text="Bot started!\n{0}".format(datetime.datetime.utcnow()))
+                 text="Bot started!\n{0}".format(datetime.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S")))
 app.idle()

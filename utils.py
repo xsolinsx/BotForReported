@@ -45,7 +45,7 @@ def ExtractMedia(msg: pyrogram.Message,
             elif msg.photo:
                 media = msg.photo
                 if bigger_photo:
-                    media = msg.photo.sizes[-1]
+                    media = msg.photo.thumbnails[-1]
             elif msg.sticker:
                 media = msg.sticker
             elif msg.video:
