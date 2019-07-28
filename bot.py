@@ -133,13 +133,15 @@ def MessagesAntiFlood(client: pyrogram.Client,
                 flood[chat_id]["warned"] = True
                 # wait two seconds to give the warn message as the last one due to multiple workers
                 time.sleep(2)
-                msg.reply(text="You are flooding, the bot will not forward your messages for {0} minute(s).".format(flood[chat_id]["flood_wait_minutes"]),
-                          disable_notification=False)
+                msg.reply_text(text="You are flooding, the bot will not forward your messages for {0} minute(s).".format(flood[chat_id]["flood_wait_minutes"]),
+                               disable_notification=False,
+                               parse_mode=None)
                 app.send_message(chat_id=master.id,
                                  text="(#user{0}) {1} is limited for flood for {2} minute(s).".format(chat_id,
                                                                                                       msg.from_user.first_name,
                                                                                                       flood[chat_id]["flood_wait_minutes"]),
-                                 disable_notification=False)
+                                 disable_notification=False,
+                                 parse_mode=None)
             # do not process messages for flooders
             msg.stop_propagation()
         else:
@@ -199,18 +201,20 @@ def CMDTestChat(client: pyrogram.Client,
             txt += "Cannot write to {0} {1}\n".format(cht,
                                                       str(ex))
 
-    msg.reply(text=txt,
-              disable_notification=False)
+    msg.reply_text(text=txt,
+                   disable_notification=False,
+                   parse_mode=None)
 
 
 @app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command("getlast", prefix=["/", "!", "#", "."]))
 def CMDGetLastUser(client: pyrogram.Client,
                    msg: pyrogram.Message):
-    msg.reply(text=last_user_string.format(datetime.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
-                                           last_user.first_name,
-                                           last_user.username,
-                                           last_user.id),
-              disable_notification=False)
+    msg.reply_text(text=last_user_string.format(datetime.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
+                                                last_user.first_name,
+                                                last_user.username,
+                                                last_user.id),
+                   disable_notification=False,
+                   parse_mode=None)
 
 
 @app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command("block", prefix=["/", "!", "#", "."]))
@@ -241,10 +245,12 @@ def CMDBlock(client: pyrogram.Client,
         txt += "(#user{0}) {1}\n".format(usr.id,
                                          usr.first_name)
         app.send_message(chat_id=usr.id,
-                         text="You have been blocked.")
+                         text="You have been blocked.",
+                         parse_mode=None)
 
-    msg.reply(text="Blocked users:\n" + txt,
-              disable_notification=False)
+    msg.reply_text(text="Blocked users:\n" + txt,
+                   disable_notification=False,
+                   parse_mode=None)
 
 
 @app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command("unblock", prefix=["/", "!", "#", "."]))
@@ -275,17 +281,19 @@ def CMDUnblock(client: pyrogram.Client,
         txt += "(#user{0}) {1}\n".format(usr.id,
                                          usr.first_name)
         app.send_message(chat_id=usr.id,
-                         text="You have been unblocked.")
+                         text="You have been unblocked.",
+                         parse_mode=None)
 
-    msg.reply(text="Unblocked users:\n" + txt,
-              disable_notification=False)
+    msg.reply_text(text="Unblocked users:\n" + txt,
+                   disable_notification=False,
+                   parse_mode=None)
 
 
 @app.on_message(pyrogram.Filters.command("start", prefix=["/", "!", "#", "."]))
 def CMDStart(client: pyrogram.Client,
              msg: pyrogram.Message):
     if msg.from_user.id == master.id:
-        msg.reply(text="""<code>/start</code> Shows this message
+        msg.reply_text(text="""<code>/start</code> Shows this message
 
 <code>/test {reply_from}|{chats}</code> Tests the specified chat(s)
 
@@ -294,20 +302,22 @@ def CMDStart(client: pyrogram.Client,
 <code>/block {reply_from}|{users}</code> Blocks the specified user(s)
 
 <code>/unblock {reply_from}|{users}</code> Unblocks the specified user(s)""",
-                  disable_notification=False,
-                  parse_mode="html")
+                       disable_notification=False,
+                       parse_mode="html")
     else:
         msg.forward(chat_id=master.id,
                     disable_notification=False)
         app.send_message(chat_id=master.id,
                          text="↑ (#user{0}) {1} ↑".format(msg.from_user.id,
                                                           msg.from_user.first_name),
-                         disable_notification=True)
-        msg.reply(text="Hi, use this bot to talk to {0} {1}, @{2} ({3})".format(master.first_name,
-                                                                                master.last_name,
-                                                                                master.username,
-                                                                                master.id),
-                  disable_notification=False)
+                         disable_notification=True,
+                         parse_mode=None)
+        msg.reply_text(text="Hi, use this bot to talk to {0} {1}, @{2} ({3})".format(master.first_name,
+                                                                                     master.last_name,
+                                                                                     master.username,
+                                                                                     master.id,
+                                                                                     parse_mode=None),
+                       disable_notification=False)
 
 
 @app.on_message(filters=pyrogram.Filters.private)
@@ -328,28 +338,34 @@ def BasicHandler(client: pyrogram.Client,
                 app.send_chat_action(chat_id=master.id,
                                      action="typing")
             except pyrogram.errors.UserIsBlocked as ex:
-                msg.reply(text="{0} blocked me.\n".format(last_user.id),
-                          disable_notification=False)
+                msg.reply_text(text="{0} blocked me.\n".format(last_user.id),
+                               disable_notification=False,
+                               parse_mode=None)
             except pyrogram.errors.PeerIdInvalid as ex:
-                msg.reply(text="Cannot write to {0}, never encountered.\n".format(last_user.id),
-                          disable_notification=False)
+                msg.reply_text(text="Cannot write to {0}, never encountered.\n".format(last_user.id),
+                               disable_notification=False,
+                               parse_mode=None)
             except Exception as ex:
-                msg.reply(text=ex,
-                          disable_notification=False)
+                msg.reply_text(text=ex,
+                               disable_notification=False,
+                               parse_mode=None)
         else:
-            msg.reply(text="Need to have last_user OR to reply to a forwarded message OR to reply to a message with the #user hashtag!",
-                      disable_notification=False)
+            msg.reply_text(text="Need to have last_user OR to reply to a forwarded message OR to reply to a message with the #user hashtag!",
+                           disable_notification=False,
+                           parse_mode=None)
     else:
         msg.forward(chat_id=master.id,
                     disable_notification=False)
         app.send_message(chat_id=master.id,
                          text="↑ (#user{0}) {1} ↑".format(msg.from_user.id,
                                                           msg.from_user.first_name),
-                         disable_notification=True)
+                         disable_notification=True,
+                         parse_mode=None)
         app.send_chat_action(chat_id=msg.from_user.id,
                              action="typing")
 
 
 app.send_message(chat_id=master.id,
-                 text="Bot started!\n{0}".format(datetime.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S")))
+                 text="Bot started!\n{0}".format(datetime.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S")),
+                 parse_mode=None)
 app.idle()
