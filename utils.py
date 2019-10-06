@@ -15,18 +15,15 @@ def IsInt(v) -> bool:
     try:
         int(v)
         return True
-    except Exception as e:
-        print(e)
+    except Exception as ex:
+        print(ex)
         return False
 
 
-def ExtractMedia(msg: pyrogram.Message,
-                 bigger_photo: bool = True) -> object:
+def ExtractMedia(msg: pyrogram.Message) -> object:
     """Extract the media from a :obj:`Message <pyrogram.Message>`.
 
     msg (:obj:`Message <pyrogram.Message>`): Message from which you want to extract the media
-
-    bigger_photo (``bool``, *optional*, default = True): True if you want to extract the bigger photo OR False if you want the list of photo of different sizes (useful only with photos).
 
 
     SUCCESS Returns the media (``object``).
@@ -44,8 +41,6 @@ def ExtractMedia(msg: pyrogram.Message,
                 media = msg.document
             elif msg.photo:
                 media = msg.photo
-                if bigger_photo:
-                    media = msg.photo.thumbnails[-1]
             elif msg.sticker:
                 media = msg.sticker
             elif msg.video:

@@ -14,8 +14,6 @@ logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.ERROR)
 
 last_user = None
-print_string = "[UTC {0}] {1}, @{2} ({3}): {4}\n"
-last_user_string = "[{0}] {1}, @{2} (#user{3})"
 
 with open(file="config.json",
           encoding="utf-8") as f:
@@ -30,6 +28,7 @@ app = pyrogram.Client(session_name="EricSolinasBot",
                       bot_token=config["telegram"]["bot_api_key"],
                       workers=4)
 app.start()
+app.set_parse_mode(parse_mode=None)
 master = app.get_chat(chat_id=config["master"])
 
 db = peewee.SqliteDatabase(database=config["database"],
@@ -134,14 +133,12 @@ def MessagesAntiFlood(client: pyrogram.Client,
                 # wait two seconds to give the warn message as the last one due to multiple workers
                 time.sleep(2)
                 msg.reply_text(text="You are flooding, the bot will not forward your messages for {0} minute(s).".format(flood[chat_id]["flood_wait_minutes"]),
-                               disable_notification=False,
-                               parse_mode=None)
+                               disable_notification=False)
                 app.send_message(chat_id=master.id,
                                  text="(#user{0}) {1} is limited for flood for {2} minute(s).".format(chat_id,
                                                                                                       msg.from_user.first_name,
                                                                                                       flood[chat_id]["flood_wait_minutes"]),
-                                 disable_notification=False,
-                                 parse_mode=None)
+                                 disable_notification=False)
             # do not process messages for flooders
             msg.stop_propagation()
         else:
@@ -152,19 +149,18 @@ def MessagesAntiFlood(client: pyrogram.Client,
     else:
         # do not process messages for flooders
         msg.stop_propagation()
-    print(print_string.format(datetime.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
-                              msg.from_user.first_name,
-                              msg.from_user.username,
-                              msg.from_user.id,
-                              msg.text if not msg.media else ("MEDIA " + utils.ExtractMedia(msg=msg,
-                                                                                            bigger_photo=True).file_id)))
+    print("[UTC {0}] {1}, @{2} ({3}): {4}\n".format(datetime.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
+                                                    msg.from_user.first_name,
+                                                    msg.from_user.username,
+                                                    msg.from_user.id,
+                                                    msg.text if not msg.media else f"MEDIA {utils.ExtractMedia(msg=msg).file_id}"))
     global last_user
     last_user = msg.from_user
 
 # endregion
 
 
-@app.on_message(pyrogram.Filters.user(master.id) & pyrogram.Filters.command("reboot", prefix=["/", "!", "#", "."]))
+@app.on_message(pyrogram.Filters.user(master.id) & pyrogram.Filters.command("reboot", prefixes=["/", "!", "#", "."]))
 def CmdReboot(client: pyrogram.Client,
               msg: pyrogram.Message):
     python = sys.executable
@@ -172,7 +168,7 @@ def CmdReboot(client: pyrogram.Client,
     os.execl(python, python, *sys.argv)
 
 
-@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command("test", prefix=["/", "!", "#", "."]))
+@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command("test", prefixes=["/", "!", "#", "."]))
 def CMDTestChat(client: pyrogram.Client,
                 msg: pyrogram.Message):
     chats_to_test = list()
@@ -192,32 +188,29 @@ def CMDTestChat(client: pyrogram.Client,
         try:
             app.send_chat_action(chat_id=cht if not utils.IsInt(cht) else int(cht),
                                  action="typing")
-            txt += "Can write to {0}\n".format(cht)
+            txt += f"Can write to {cht}\n"
         except pyrogram.errors.UserIsBlocked as ex:
-            txt += "{0} blocked me\n".format(cht)
+            txt += f"{cht} blocked me\n"
         except pyrogram.errors.PeerIdInvalid as ex:
-            txt += "Cannot write to {0}, never encountered.\n".format(cht)
+            txt += f"Cannot write to {cht}, never encountered.\n"
         except Exception as ex:
-            txt += "Cannot write to {0} {1}\n".format(cht,
-                                                      str(ex))
+            txt += f"Cannot write to {cht} {ex}\n"
 
     msg.reply_text(text=txt,
-                   disable_notification=False,
-                   parse_mode=None)
+                   disable_notification=False)
 
 
-@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command("getlast", prefix=["/", "!", "#", "."]))
+@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command("getlast", prefixes=["/", "!", "#", "."]))
 def CMDGetLastUser(client: pyrogram.Client,
                    msg: pyrogram.Message):
-    msg.reply_text(text=last_user_string.format(datetime.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
-                                                last_user.first_name,
-                                                last_user.username,
-                                                last_user.id),
-                   disable_notification=False,
-                   parse_mode=None)
+    msg.reply_text(text="[{0}] {1}, @{2} (#user{3})".format(datetime.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
+                                                            last_user.first_name,
+                                                            last_user.username,
+                                                            last_user.id),
+                   disable_notification=False)
 
 
-@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command("block", prefix=["/", "!", "#", "."]))
+@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command("block", prefixes=["/", "!", "#", "."]))
 def CMDBlock(client: pyrogram.Client,
              msg: pyrogram.Message):
     users_to_block = list()
@@ -242,18 +235,15 @@ def CMDBlock(client: pyrogram.Client,
                      last_name=usr.first_name,
                      username=usr.username,
                      is_blocked=True).execute()
-        txt += "(#user{0}) {1}\n".format(usr.id,
-                                         usr.first_name)
+        txt += f"(#user{usr.id}) {usr.first_name}\n"
         app.send_message(chat_id=usr.id,
-                         text="You have been blocked.",
-                         parse_mode=None)
+                         text="You have been blocked.")
 
-    msg.reply_text(text="Blocked users:\n" + txt,
-                   disable_notification=False,
-                   parse_mode=None)
+    msg.reply_text(text=f"Blocked users:\n{txt}",
+                   disable_notification=False)
 
 
-@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command("unblock", prefix=["/", "!", "#", "."]))
+@app.on_message(pyrogram.Filters.chat(master.id) & pyrogram.Filters.command("unblock", prefixes=["/", "!", "#", "."]))
 def CMDUnblock(client: pyrogram.Client,
                msg: pyrogram.Message):
     users_to_unblock = list()
@@ -278,18 +268,15 @@ def CMDUnblock(client: pyrogram.Client,
                      last_name=usr.first_name,
                      username=usr.username,
                      is_blocked=False).execute()
-        txt += "(#user{0}) {1}\n".format(usr.id,
-                                         usr.first_name)
+        txt += f"(#user{usr.id}) {usr.first_name}\n"
         app.send_message(chat_id=usr.id,
-                         text="You have been unblocked.",
-                         parse_mode=None)
+                         text="You have been unblocked.")
 
-    msg.reply_text(text="Unblocked users:\n" + txt,
-                   disable_notification=False,
-                   parse_mode=None)
+    msg.reply_text(text=f"Unblocked users:\n{txt}",
+                   disable_notification=False)
 
 
-@app.on_message(pyrogram.Filters.command("start", prefix=["/", "!", "#", "."]))
+@app.on_message(pyrogram.Filters.command("start", prefixes=["/", "!", "#", "."]))
 def CMDStart(client: pyrogram.Client,
              msg: pyrogram.Message):
     if msg.from_user.id == master.id:
@@ -308,15 +295,9 @@ def CMDStart(client: pyrogram.Client,
         msg.forward(chat_id=master.id,
                     disable_notification=False)
         app.send_message(chat_id=master.id,
-                         text="↑ (#user{0}) {1} ↑".format(msg.from_user.id,
-                                                          msg.from_user.first_name),
-                         disable_notification=True,
-                         parse_mode=None)
-        msg.reply_text(text="Hi, use this bot to talk to {0} {1}, @{2} ({3})".format(master.first_name,
-                                                                                     master.last_name,
-                                                                                     master.username,
-                                                                                     master.id,
-                                                                                     parse_mode=None),
+                         text=f"↑ (#user{msg.from_user.id}) {msg.from_user.first_name} ↑",
+                         disable_notification=True)
+        msg.reply_text(text=f"Hi, use this bot to talk to {master.first_name} {master.last_name if master.last_name else ''}, @{master.username if master.username else ''} ({master.id})",
                        disable_notification=False)
 
 
@@ -338,34 +319,28 @@ def BasicHandler(client: pyrogram.Client,
                 app.send_chat_action(chat_id=master.id,
                                      action="typing")
             except pyrogram.errors.UserIsBlocked as ex:
-                msg.reply_text(text="{0} blocked me.\n".format(last_user.id),
-                               disable_notification=False,
-                               parse_mode=None)
+                msg.reply_text(text=f"{last_user.id} blocked me.\n",
+                               disable_notification=False)
             except pyrogram.errors.PeerIdInvalid as ex:
-                msg.reply_text(text="Cannot write to {0}, never encountered.\n".format(last_user.id),
-                               disable_notification=False,
-                               parse_mode=None)
+                msg.reply_text(text=f"Cannot write to {last_user.id}, never encountered.\n",
+                               disable_notification=False)
             except Exception as ex:
                 msg.reply_text(text=ex,
-                               disable_notification=False,
-                               parse_mode=None)
+                               disable_notification=False)
         else:
             msg.reply_text(text="Need to have last_user OR to reply to a forwarded message OR to reply to a message with the #user hashtag!",
-                           disable_notification=False,
-                           parse_mode=None)
+                           disable_notification=False)
     else:
         msg.forward(chat_id=master.id,
                     disable_notification=False)
         app.send_message(chat_id=master.id,
-                         text="↑ (#user{0}) {1} ↑".format(msg.from_user.id,
-                                                          msg.from_user.first_name),
-                         disable_notification=True,
-                         parse_mode=None)
+                         text=f"↑ (#user{msg.from_user.id}) {msg.from_user.first_name} ↑",
+                         disable_notification=True)
         app.send_chat_action(chat_id=msg.from_user.id,
                              action="typing")
 
 
 app.send_message(chat_id=master.id,
-                 text="Bot started!\n{0}".format(datetime.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S")),
-                 parse_mode=None)
+                 text="Bot started!\n{0}".format(datetime.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S")))
 app.idle()
+app.stop()
