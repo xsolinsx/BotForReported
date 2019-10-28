@@ -1,6 +1,5 @@
 import math
 import os
-import pathlib
 import platform
 import re
 import string
@@ -196,10 +195,10 @@ def BuildItemsKeyboard(path: str,
                 # max_columns buttons per line, then add another row
                 keyboard.append([])
             tmp_path = os.path.abspath(os.path.join(path, item))
-            if os.path.isfile(os.path.abspath(os.path.join(path, item))):
+            if os.path.isfile(tmp_path):
                 keyboard[-1].append(pyrogram.InlineKeyboardButton(text=pyrogram.Emoji.PAGE_FACING_UP + f" {item}",
                                                                   callback_data=f"FMul{i}"))
-            elif os.path.isdir(os.path.abspath(os.path.join(path, item))):
+            elif os.path.isdir(tmp_path):
                 keyboard[-1].append(pyrogram.InlineKeyboardButton(text=pyrogram.Emoji.OPEN_FILE_FOLDER + f" {item}",
                                                                   callback_data=f"FMcd{i}"))
             else:
@@ -242,82 +241,9 @@ def filter_callback_regex(pattern: str,
                                                     flags),
                                    name="Regex")
 
-# region manage paths
-
-
-def rreplace(s: str,
-             old: str,
-             new: str) -> str:
-    li = s.rsplit(old, 1)
-    # Split only once
-    return new.join(li)
-
-
-def GetLastPartOfPath(path: str) -> str:
-    return os.path.basename(os.path.normpath(path))
-
-
-def GetAbsolutePath(s: str,
-                    currentAbsPath: str = "/") -> str:
-    """
-    Adjust the path that is passed as first parameter.
-
-    s (``str``): "." (Indicates the same folder of the currentAbsPath) OR ".." (Indicates the previous folder of currentAbsPath) OR "this/is/a/relative/path" OR "/this/is/an/absolute/path".
-
-    currentAbsPath (``str``, *optional*, default = "/"): If s is "." this parameter is the path returned OR If s is ".." this parameter is the path returned without the last folder OR If s is a relative path it is concatenated with this parameter OR If s is an absolute path this parameter is useless.
-
-
-    SUCCESS Returns the absolute path (``str``).
-    """
-    path = None
-    if s == ".":
-        # same folder
-        path = currentAbsPath
-    elif s == "..":
-        # previous folder
-        s.replace("..", "")
-        path = str(pathlib.Path(currentAbsPath).parent)
-    elif s == "/":
-        # root folder
-        path = s
-    elif os.path.isabs(s):
-        # absolute path
-        pieces = s.split("/")
-        # split the path in order to find possible ".." or "."
-        currentAbsPath = "/"
-        for piece in pieces:
-            if piece == ".":
-                # ignore
-                pass
-            elif piece == "..":
-                # previous folder
-                currentAbsPath = str(pathlib.Path(currentAbsPath).parent)
-            else:
-                currentAbsPath += ("/" if not currentAbsPath.endswith("/")
-                                   else "") + piece
-        path = currentAbsPath
-    else:
-        # relative path
-        pieces = s.split("/")
-        # split the path in order to find possible ".." or "."
-        for piece in pieces:
-            if piece == ".":
-                # ignore
-                pass
-            elif piece == "..":
-                # previous folder
-                currentAbsPath = str(pathlib.Path(currentAbsPath).parent)
-            else:
-                currentAbsPath += ("/" if not currentAbsPath.endswith("/")
-                                   else "") + piece
-        path = currentAbsPath
-    return path
-
 
 def GetDrives():
     return [drive for drive in string.ascii_uppercase if os.path.exists(drive + ":\\")]
-
-# endregion
 
 # region file upload/download
 
