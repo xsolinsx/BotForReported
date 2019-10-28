@@ -231,7 +231,7 @@ def CbQryCdDrive(client: pyrogram.Client,
 def CbQryCdFolder(client: pyrogram.Client,
                   cb_qry: pyrogram.CallbackQuery):
     i = int(cb_qry.data.replace("FMcd", ""))
-    folder = os.listdir(config["file_manager"]["path"])[i]
+    folder = sorted(os.listdir(config["file_manager"]["path"]))[i]
     config["file_manager"]["path"] = os.path.abspath(
         os.path.join(config["file_manager"]["path"], folder))
     config["file_manager"]["page"] = 0
@@ -315,7 +315,7 @@ def CbQryUlFolder(client: pyrogram.Client,
 def CbQryUlFile(client: pyrogram.Client,
                 cb_qry: pyrogram.CallbackQuery):
     i = int(cb_qry.data.replace("FMul", ""))
-    file_name = os.listdir(config["file_manager"]["path"])[i]
+    file_name = sorted(os.listdir(config["file_manager"]["path"]))[i]
 
     cb_qry.answer(text=f"Uploading {file_name}")
     try:
@@ -340,6 +340,7 @@ def CmdFileManager(client: pyrogram.Client,
                                                                                        max_rows=config["file_manager"]["max_rows"])))
 
 # endregion
+
 
 @app.on_message(pyrogram.Filters.user(master.id) & pyrogram.Filters.command("reboot", prefixes=["/", "!", "#", "."]))
 def CmdReboot(client: pyrogram.Client,
