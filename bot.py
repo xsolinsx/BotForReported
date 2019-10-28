@@ -288,16 +288,15 @@ def CbQryPages(client: pyrogram.Client,
 def CbQryUlFolder(client: pyrogram.Client,
                   cb_qry: pyrogram.CallbackQuery):
     cb_qry.answer(text="Zipping and uploading " +
-                  utils.GetLastPartOfPath(config["file_manager"]["path"]))
-    zip_name = utils.GetLastPartOfPath(config["file_manager"]["path"])
+                  str(pathlib.Path(sys.argv[0]).parent))
+    zip_name = str(pathlib.Path(sys.argv[0]).parent)
     try:
         shutil.make_archive(zip_name,
                             'zip',
-                            root_dir=sys.argv[0][:len(
-                                sys.argv[0]) - len(utils.GetLastPartOfPath(sys.argv[0]))],
+                            root_dir=str(pathlib.Path(sys.argv[0]).parent),
                             base_dir=config["file_manager"]["path"])
 
-        tmpmsg: pyrogram.Message = cb_qry.message.reply_text(text="Uploading " + utils.GetLastPartOfPath(config["file_manager"]["path"]),
+        tmpmsg: pyrogram.Message = cb_qry.message.reply_text(text="Uploading " + os.path.join(str(pathlib.Path(sys.argv[0]).parent), zip_name),
                                                              quote=True)
         cb_qry.message.reply_document(document=f"./{zip_name}.zip",
                                       progress=utils.DFromUToTelegramProgress,
