@@ -288,8 +288,8 @@ def CbQryPages(client: pyrogram.Client,
 def CbQryUlFolder(client: pyrogram.Client,
                   cb_qry: pyrogram.CallbackQuery):
     cb_qry.answer(text="Zipping and uploading " +
-                  str(pathlib.Path(sys.argv[0]).parent))
-    zip_name = str(pathlib.Path(sys.argv[0]).parent)
+                  str(pathlib.Path(config["file_manager"]["path"]).name))
+    zip_name = str(pathlib.Path(config["file_manager"]["path"]).name)
     try:
         shutil.make_archive(zip_name,
                             'zip',
