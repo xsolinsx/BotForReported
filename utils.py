@@ -190,7 +190,7 @@ def BuildItemsKeyboard(path: str,
                                                          callback_data=("FMcd.."))])
 
     keyboard = [[]]
-    for i, item in enumerate(items):
+    for i, item in enumerate(sorted(items)):
         if i + 1 > page * max_items_keyboard:
             if len(keyboard[-1]) >= max_columns:
                 # max_columns buttons per line, then add another row
