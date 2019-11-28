@@ -59,12 +59,13 @@ def ExtractMedia(msg: pyrogram.Message) -> object:
 
     return media
 
+
 # region keyboards
 
 
-def BuildKeyboard(main_buttons: list,
-                  header_buttons: list = None,
-                  footer_buttons: list = None) -> list:
+def BuildKeyboard(
+    main_buttons: list, header_buttons: list = None, footer_buttons: list = None
+) -> list:
     """
     Build a list that can be used for an inline keyboard.
 
@@ -87,9 +88,7 @@ def BuildKeyboard(main_buttons: list,
     return menu
 
 
-def BuildPager(page: int,
-               n_items: int,
-               max_items_keyboard: int) -> list:
+def BuildPager(page: int, n_items: int, max_items_keyboard: int) -> list:
     """
     Use this method to create the pager on the bottom of the keyboards.
 
@@ -110,31 +109,46 @@ def BuildPager(page: int,
         page_shift_row = list()
         if page - 2 >= 0:
             # goto first
-            page_shift_row.append(pyrogram.InlineKeyboardButton(pyrogram.Emoji.LAST_TRACK_BUTTON,
-                                                                callback_data=f"FMpages{page}<<"))
+            page_shift_row.append(
+                pyrogram.InlineKeyboardButton(
+                    pyrogram.Emoji.LAST_TRACK_BUTTON, callback_data=f"FMpages{page}<<"
+                )
+            )
         if page - 1 >= 0:
             # previous page
-            page_shift_row.append(pyrogram.InlineKeyboardButton(pyrogram.Emoji.REVERSE_BUTTON,
-                                                                callback_data=f"FMpages{page}-"))
+            page_shift_row.append(
+                pyrogram.InlineKeyboardButton(
+                    pyrogram.Emoji.REVERSE_BUTTON, callback_data=f"FMpages{page}-"
+                )
+            )
         # select page button
-        page_shift_row.append(pyrogram.InlineKeyboardButton(str(page + 1) + "/" + str(math.ceil(n_items / max_items_keyboard)),
-                                                            callback_data=f"FMpages"))
+        page_shift_row.append(
+            pyrogram.InlineKeyboardButton(
+                str(page + 1) + "/" + str(math.ceil(n_items / max_items_keyboard)),
+                callback_data=f"FMpages",
+            )
+        )
         if page + 1 < math.ceil(n_items / max_items_keyboard):
             # next page
-            page_shift_row.append(pyrogram.InlineKeyboardButton(pyrogram.Emoji.PLAY_BUTTON,
-                                                                callback_data=f"FMpages{page}+"))
+            page_shift_row.append(
+                pyrogram.InlineKeyboardButton(
+                    pyrogram.Emoji.PLAY_BUTTON, callback_data=f"FMpages{page}+"
+                )
+            )
         if page + 2 < math.ceil(n_items / max_items_keyboard):
             # goto last
-            page_shift_row.append(pyrogram.InlineKeyboardButton(pyrogram.Emoji.NEXT_TRACK_BUTTON,
-                                                                callback_data=f"FMpages{page}>>"))
+            page_shift_row.append(
+                pyrogram.InlineKeyboardButton(
+                    pyrogram.Emoji.NEXT_TRACK_BUTTON, callback_data=f"FMpages{page}>>"
+                )
+            )
         pager.append(page_shift_row)
     return pager
 
 
-def BuildItemsKeyboard(path: str,
-                       page: int = 0,
-                       max_columns: int = 2,
-                       max_rows: int = 8):
+def BuildItemsKeyboard(
+    path: str, page: int = 0, max_columns: int = 2, max_rows: int = 8
+):
     """
     Use this method to process items of the folder in order to create a keyboard.
 
@@ -170,56 +184,84 @@ def BuildItemsKeyboard(path: str,
         # Linux or Mac or other folder
         try:
             items = os.listdir(path)
-        except Exception as ex:
+        except Exception:
             items = []
 
     header = list()
     if path:
         if items:
-            header.append([pyrogram.InlineKeyboardButton(text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} .",
-                                                         callback_data=("FMcd.")),
-                           pyrogram.InlineKeyboardButton(text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} ..",
-                                                         callback_data=("FMcd..")),
-                           pyrogram.InlineKeyboardButton(text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} {pyrogram.Emoji.DOWN_ARROW}",
-                                                         callback_data=("FMul."))])
+            header.append(
+                [
+                    pyrogram.InlineKeyboardButton(
+                        text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} .",
+                        callback_data=("FMcd."),
+                    ),
+                    pyrogram.InlineKeyboardButton(
+                        text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} ..",
+                        callback_data=("FMcd.."),
+                    ),
+                    pyrogram.InlineKeyboardButton(
+                        text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} {pyrogram.Emoji.DOWN_ARROW}",
+                        callback_data=("FMul."),
+                    ),
+                ]
+            )
         else:
-            header.append([pyrogram.InlineKeyboardButton(text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} .",
-                                                         callback_data=("FMcd.")),
-                           pyrogram.InlineKeyboardButton(text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} ..",
-                                                         callback_data=("FMcd.."))])
+            header.append(
+                [
+                    pyrogram.InlineKeyboardButton(
+                        text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} .",
+                        callback_data=("FMcd."),
+                    ),
+                    pyrogram.InlineKeyboardButton(
+                        text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} ..",
+                        callback_data=("FMcd.."),
+                    ),
+                ]
+            )
 
     keyboard = [[]]
     for i, item in enumerate(sorted(items)):
-        if i + 1 > page * max_items_keyboard:
+        if i >= page * max_items_keyboard:
             if len(keyboard[-1]) >= max_columns:
                 # max_columns buttons per line, then add another row
                 keyboard.append([])
             tmp_path = os.path.abspath(os.path.join(path, item))
             if os.path.isfile(tmp_path):
-                keyboard[-1].append(pyrogram.InlineKeyboardButton(text=pyrogram.Emoji.PAGE_FACING_UP + f" {item}",
-                                                                  callback_data=f"FMul{i}"))
+                keyboard[-1].append(
+                    pyrogram.InlineKeyboardButton(
+                        text=pyrogram.Emoji.PAGE_FACING_UP + f" {item}",
+                        callback_data=f"FMul{i}",
+                    )
+                )
             elif os.path.isdir(tmp_path):
-                keyboard[-1].append(pyrogram.InlineKeyboardButton(text=pyrogram.Emoji.OPEN_FILE_FOLDER + f" {item}",
-                                                                  callback_data=f"FMcd{i}"))
+                keyboard[-1].append(
+                    pyrogram.InlineKeyboardButton(
+                        text=pyrogram.Emoji.OPEN_FILE_FOLDER + f" {item}",
+                        callback_data=f"FMcd{i}",
+                    )
+                )
             else:
-                keyboard[-1].append(pyrogram.InlineKeyboardButton(text=pyrogram.Emoji.QUESTION_MARK + f" {item}",
-                                                                  callback_data=f"FM{i}" if path else f"FMcddrive{i}"))
+                keyboard[-1].append(
+                    pyrogram.InlineKeyboardButton(
+                        text=pyrogram.Emoji.QUESTION_MARK + f" {item}",
+                        callback_data=f"FM{i}" if path else f"FMcddrive{i}",
+                    )
+                )
             if sum([len(row) for row in keyboard]) >= max_items_keyboard:
                 break
 
-    footer = BuildPager(page,
-                        len(items),
-                        max_items_keyboard)
-    list_of_buttons = BuildKeyboard(main_buttons=keyboard,
-                                    header_buttons=header,
-                                    footer_buttons=footer)
+    footer = BuildPager(page, len(items), max_items_keyboard)
+    list_of_buttons = BuildKeyboard(
+        main_buttons=keyboard, header_buttons=header, footer_buttons=footer
+    )
     return list_of_buttons
+
 
 # endregion
 
 
-def filter_callback_regex(pattern: str,
-                          flags=None):
+def filter_callback_regex(pattern: str, flags=None):
     """Filter messages that match a given RegEx pattern.
 
     Args:
@@ -236,20 +278,17 @@ def filter_callback_regex(pattern: str,
         matches = [i for i in filter_.regex.finditer(callback_query.data)]
         return bool(matches)
 
-    return pyrogram.Filters.create(f,
-                                   regex=re.compile(pattern,
-                                                    flags),
-                                   name="Regex")
+    return pyrogram.Filters.create(f, regex=re.compile(pattern, flags), name="Regex")
 
 
 def GetDrives():
     return [drive for drive in string.ascii_uppercase if os.path.exists(drive + ":\\")]
 
+
 # region file upload/download
 
 
-def SizeFormatter(b: int,
-                  human_readable: bool = False) -> str:
+def SizeFormatter(b: int, human_readable: bool = False) -> str:
     """
     Adjust the size from biys to the right measure.
 
@@ -268,25 +307,27 @@ def SizeFormatter(b: int,
         if B < KB:
             return "{0} B".format(B)
         elif KB <= B < MB:
-            return "{0:.2f} KB".format(B/KB)
+            return "{0:.2f} KB".format(B / KB)
         elif MB <= B < GB:
-            return "{0:.2f} MB".format(B/MB)
+            return "{0:.2f} MB".format(B / MB)
         elif GB <= B < TB:
-            return "{0:.2f} GB".format(B/GB)
+            return "{0:.2f} GB".format(B / GB)
         elif TB <= B:
-            return "{0:.2f} TB".format(B/TB)
+            return "{0:.2f} TB".format(B / TB)
     else:
         B, b = divmod(int(b), 8)
         KB, B = divmod(B, 1024)
         MB, KB = divmod(KB, 1024)
         GB, MB = divmod(MB, 1024)
         TB, GB = divmod(GB, 1024)
-        tmp = ((str(TB) + "TB, ") if TB > 0 else "") + \
-            ((str(GB) + "GB, ") if GB > 0 else "") + \
-            ((str(MB) + "MB, ") if MB > 0 else "") + \
-            ((str(KB) + "KB, ") if KB > 0 else "") + \
-            ((str(B) + "B, ") if B > 0 else "") + \
-            ((str(b) + "b, ") if b > 0 else "")
+        tmp = (
+            ((str(TB) + "TB, ") if TB > 0 else "")
+            + ((str(GB) + "GB, ") if GB > 0 else "")
+            + ((str(MB) + "MB, ") if MB > 0 else "")
+            + ((str(KB) + "KB, ") if KB > 0 else "")
+            + ((str(B) + "B, ") if B > 0 else "")
+            + ((str(b) + "b, ") if b > 0 else "")
+        )
         return tmp[:-2]
 
 
@@ -303,19 +344,19 @@ def TimeFormatter(milliseconds: int) -> str:
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
-    tmp = ((str(days) + "d, ") if days > 0 else "") + \
-        ((str(hours) + "h, ") if hours > 0 else "") + \
-        ((str(minutes) + "m, ") if minutes > 0 else "") + \
-        ((str(seconds) + "s, ") if seconds > 0 else "") + \
-        ((str(milliseconds) + "ms, ") if milliseconds > 0 else "")
+    tmp = (
+        ((str(days) + "d, ") if days > 0 else "")
+        + ((str(hours) + "h, ") if hours > 0 else "")
+        + ((str(minutes) + "m, ") if minutes > 0 else "")
+        + ((str(seconds) + "s, ") if seconds > 0 else "")
+        + ((str(milliseconds) + "ms, ") if milliseconds > 0 else "")
+    )
     return tmp[:-2]
 
 
-def DFromUToTelegramProgress(current: int,
-                             total: int,
-                             msg: pyrogram.Message,
-                             text: str,
-                             start: float) -> None:
+def DFromUToTelegramProgress(
+    current: int, total: int, msg: pyrogram.Message, text: str, start: float
+) -> None:
     """
     Use this method to update the progress of a download from/an upload to Telegram, this method is called every 512KB.
     Update message every ~4 seconds.
@@ -349,19 +390,20 @@ def DFromUToTelegramProgress(current: int,
         estimated_total_time = TimeFormatter(milliseconds=estimated_total_time)
         # 0% = [░░░░░░░░░░░░░░░░░░░░]
         # 100% = [████████████████████]
-        progress = "[{0}{1}] {2}%\n".format(''.join(["█" for i in range(math.floor(percentage / 5))]),
-                                            ''.join(
-                                                ["░" for i in range(20 - math.floor(percentage / 5))]),
-                                            round(percentage, 2))
-        tmp = progress + "{0}/{1}\n{2}/s {3}/{4}\n".format(SizeFormatter(b=current * 8,
-                                                                         human_readable=True),
-                                                           SizeFormatter(b=total * 8,
-                                                                         human_readable=True),
-                                                           SizeFormatter(b=speed * 8,
-                                                                         human_readable=True),
-                                                           elapsed_time if elapsed_time != '' else "0 s",
-                                                           estimated_total_time if estimated_total_time != '' else "0 s")
+        progress = "[{0}{1}] {2}%\n".format(
+            "".join(["█" for i in range(math.floor(percentage / 5))]),
+            "".join(["░" for i in range(20 - math.floor(percentage / 5))]),
+            round(percentage, 2),
+        )
+        tmp = progress + "{0}/{1}\n{2}/s {3}/{4}\n".format(
+            SizeFormatter(b=current * 8, human_readable=True),
+            SizeFormatter(b=total * 8, human_readable=True),
+            SizeFormatter(b=speed * 8, human_readable=True),
+            elapsed_time if elapsed_time != "" else "0 s",
+            estimated_total_time if estimated_total_time != "" else "0 s",
+        )
 
         msg.edit(text=text + tmp)
+
 
 # endregion
