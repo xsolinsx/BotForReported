@@ -1,0 +1,7 @@
+config.json
+*.session
+*.db
+*.db-shm
+*.db-wal
+.vscode/
+*.code-workspace

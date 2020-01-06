@@ -107,8 +107,8 @@ def Backup() -> str:
                 os.unlink(file_path)
             elif os.path.isdir(file_path):
                 shutil.rmtree(file_path)
-        except Exception as e:
-            print("Failed to delete %s. Reason: %s" % (file_path, e))
+        except Exception as ex:
+            print(f"Failed to delete {file_path}. Reason: {ex}")
     # remove previous backups
     for filename in glob.glob("../backupBotForReported*"):
         os.remove(filename)
@@ -137,7 +137,7 @@ def SendBackup(client: pyrogram.Client):
         document=zip_name,
         disable_notification=True,
         progress=DFromUToTelegramProgress,
-        progress_args=(tmp_msg, "I am sending the automatic backup.", time.time(),),
+        progress_args=(tmp_msg, "I am sending the automatic backup.", time.time()),
     )
 
 
