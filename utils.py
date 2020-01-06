@@ -1,11 +1,20 @@
+import glob
+import json
 import math
 import os
-import platform
 import re
+import shutil
 import string
 import time
+import typing
 
 import pyrogram
+
+import db_management
+
+config = None
+with open(file="config.json", encoding="utf-8") as f:
+    config = json.load(fp=f)
 
 
 def IsInt(v) -> bool:
@@ -60,205 +69,13 @@ def ExtractMedia(msg: pyrogram.Message) -> object:
     return media
 
 
-# region keyboards
-
-
-def BuildKeyboard(
-    main_buttons: list, header_buttons: list = None, footer_buttons: list = None
-) -> list:
-    """
-    Build a list that can be used for an inline keyboard.
-
-    main_buttons (``list``): Main list of buttons.
-
-    header_buttons (``list``, *optional*, default = None): Buttons to place on the top of the keyboard.
-
-    footer_buttons (``list``, *optional*, default = None): Buttons to place on the bottom of the keyboard.
-
-
-    SUCCESS Returns ``list`` of buttons.
-    """
-    menu = []
-    if header_buttons:
-        menu.extend(header_buttons)
-    menu.extend(main_buttons)
-    if footer_buttons:
-        menu.extend(footer_buttons)
-
-    return menu
-
-
-def BuildPager(page: int, n_items: int, max_items_keyboard: int) -> list:
-    """
-    Use this method to create the pager on the bottom of the keyboards.
-
-    page (``int``): Current page you are on.
-
-    n_items (``int``): Number of items to put in the keyboard.
-
-    max_items_keyboard (``int``): Maximum number of items to put in the keyboard per page.
-
-
-    SUCCESS Returns ``list`` of buttons to append to a keyboard that needs it.
-    """
-    page = int(page)
-    n_items = int(n_items)
-    max_items_keyboard = int(max_items_keyboard)
-    pager = list()
-    if n_items > max_items_keyboard:
-        page_shift_row = list()
-        if page - 2 >= 0:
-            # goto first
-            page_shift_row.append(
-                pyrogram.InlineKeyboardButton(
-                    pyrogram.Emoji.LAST_TRACK_BUTTON, callback_data=f"FMpages{page}<<"
-                )
-            )
-        if page - 1 >= 0:
-            # previous page
-            page_shift_row.append(
-                pyrogram.InlineKeyboardButton(
-                    pyrogram.Emoji.REVERSE_BUTTON, callback_data=f"FMpages{page}-"
-                )
-            )
-        # select page button
-        page_shift_row.append(
-            pyrogram.InlineKeyboardButton(
-                str(page + 1) + "/" + str(math.ceil(n_items / max_items_keyboard)),
-                callback_data=f"FMpages",
-            )
-        )
-        if page + 1 < math.ceil(n_items / max_items_keyboard):
-            # next page
-            page_shift_row.append(
-                pyrogram.InlineKeyboardButton(
-                    pyrogram.Emoji.PLAY_BUTTON, callback_data=f"FMpages{page}+"
-                )
-            )
-        if page + 2 < math.ceil(n_items / max_items_keyboard):
-            # goto last
-            page_shift_row.append(
-                pyrogram.InlineKeyboardButton(
-                    pyrogram.Emoji.NEXT_TRACK_BUTTON, callback_data=f"FMpages{page}>>"
-                )
-            )
-        pager.append(page_shift_row)
-    return pager
-
-
-def BuildItemsKeyboard(
-    path: str, page: int = 0, max_columns: int = 2, max_rows: int = 8
-):
-    """
-    Use this method to process items of the folder in order to create a keyboard.
-
-    path (``str``): Pass the path you want to build the keyboard on.
-
-    page (``int``): Pass the page you want to be on.
-
-    max_columns (``int``, *optional*, default = 2): Pass the maximum number of columns(buttons) to insert per keyboard(row) (1 to 8).
-
-    max_rows (``int``, *optional*, default = 8): Pass the maximum number of rows to insert per keyboard (6 to 100).
-
-
-    SUCCESS Returns ``list`` of items and other useful buttons.
-
-    FAILURE Returns an error (``str``).
-    """
-    path = str(path) if path else "/"
-    page = int(page)
-    max_rows = int(max_rows)
-    max_columns = int(max_columns)
-    # adjust the maximum number of columns(buttons) per keyboard(row) if out of bounds
-    if max_columns < 1 or max_columns > 8:
-        max_columns = 2
-    # adjust the maximum number of rows per keyboard if out of bounds
-    if max_rows < 6 or max_rows > 100:
-        max_rows = 8
-    max_items_keyboard = max_rows * max_columns
-    if platform.system() == "Windows" and path == "/":
-        # Windows root(s)
-        path = ""
-        items = GetDrives()
-    else:
-        # Linux or Mac or other folder
-        try:
-            items = os.listdir(path)
-        except Exception:
-            items = []
-
-    header = list()
-    if path:
-        if items:
-            header.append(
-                [
-                    pyrogram.InlineKeyboardButton(
-                        text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} .",
-                        callback_data=("FMcd."),
-                    ),
-                    pyrogram.InlineKeyboardButton(
-                        text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} ..",
-                        callback_data=("FMcd.."),
-                    ),
-                    pyrogram.InlineKeyboardButton(
-                        text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} {pyrogram.Emoji.DOWN_ARROW}",
-                        callback_data=("FMul."),
-                    ),
-                ]
-            )
-        else:
-            header.append(
-                [
-                    pyrogram.InlineKeyboardButton(
-                        text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} .",
-                        callback_data=("FMcd."),
-                    ),
-                    pyrogram.InlineKeyboardButton(
-                        text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} ..",
-                        callback_data=("FMcd.."),
-                    ),
-                ]
-            )
-
-    keyboard = [[]]
-    for i, item in enumerate(sorted(items)):
-        if i >= page * max_items_keyboard:
-            if len(keyboard[-1]) >= max_columns:
-                # max_columns buttons per line, then add another row
-                keyboard.append([])
-            tmp_path = os.path.abspath(os.path.join(path, item))
-            if os.path.isfile(tmp_path):
-                keyboard[-1].append(
-                    pyrogram.InlineKeyboardButton(
-                        text=pyrogram.Emoji.PAGE_FACING_UP + f" {item}",
-                        callback_data=f"FMul{i}",
-                    )
-                )
-            elif os.path.isdir(tmp_path):
-                keyboard[-1].append(
-                    pyrogram.InlineKeyboardButton(
-                        text=pyrogram.Emoji.OPEN_FILE_FOLDER + f" {item}",
-                        callback_data=f"FMcd{i}",
-                    )
-                )
-            else:
-                keyboard[-1].append(
-                    pyrogram.InlineKeyboardButton(
-                        text=pyrogram.Emoji.QUESTION_MARK + f" {item}",
-                        callback_data=f"FM{i}" if path else f"FMcddrive{i}",
-                    )
-                )
-            if sum([len(row) for row in keyboard]) >= max_items_keyboard:
-                break
-
-    footer = BuildPager(page, len(items), max_items_keyboard)
-    list_of_buttons = BuildKeyboard(
-        main_buttons=keyboard, header_buttons=header, footer_buttons=footer
+def PrintUser(user: typing.Union[pyrogram.Chat, pyrogram.User]) -> str:
+    return (
+        (user.first_name + (f" {user.last_name}" if user.last_name else ""))
+        + " ("
+        + (f"@{user.username} " if user.username else "")
+        + f"#user{user.id})"
     )
-    return list_of_buttons
-
-
-# endregion
 
 
 def filter_callback_regex(pattern: str, flags=None):
@@ -281,11 +98,51 @@ def filter_callback_regex(pattern: str, flags=None):
     return pyrogram.Filters.create(f, regex=re.compile(pattern, flags), name="Regex")
 
 
+def Backup() -> str:
+    # empty downloads folder
+    for filename in os.listdir("./downloads"):
+        file_path = os.path.join("./downloads", filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print("Failed to delete %s. Reason: %s" % (file_path, e))
+    # remove previous backups
+    for filename in glob.glob("../backupBotForReported*"):
+        os.remove(filename)
+    # compress db
+    db_management.DB.execute_sql("VACUUM")
+
+    db_management.DB.close()
+    zip_name = shutil.make_archive(
+        base_name=f"../backupBotForReported{int(time.time())}", format="zip",
+    )
+    db_management.DB.connect(reuse_if_open=True)
+    return zip_name
+
+
+def SendBackup(client: pyrogram.Client):
+    tmp_msg = client.send_message(
+        chat_id=config["master"],
+        text="I am preparing the automatic backup.",
+        disable_notification=True,
+    )
+
+    zip_name = Backup()
+
+    client.send_document(
+        chat_id=config["master"],
+        document=zip_name,
+        disable_notification=True,
+        progress=DFromUToTelegramProgress,
+        progress_args=(tmp_msg, "I am sending the automatic backup.", time.time(),),
+    )
+
+
 def GetDrives():
     return [drive for drive in string.ascii_uppercase if os.path.exists(drive + ":\\")]
-
-
-# region file upload/download
 
 
 def SizeFormatter(b: int, human_readable: bool = False) -> str:
@@ -404,6 +261,3 @@ def DFromUToTelegramProgress(
         )
 
         msg.edit(text=text + tmp)
-
-
-# endregion
