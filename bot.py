@@ -20,6 +20,7 @@ logging.basicConfig(
 )
 
 if not utils.config:
+    logging.log(logging.FATAL, "Missing config.json")
     exit()
 
 plugins = dict(root="plugins")

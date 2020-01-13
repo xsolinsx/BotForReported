@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import string
+import tarfile
 import time
 import typing
 
@@ -110,17 +111,23 @@ def Backup() -> str:
         except Exception as ex:
             print(f"Failed to delete {file_path}. Reason: {ex}")
     # remove previous backups
-    for filename in glob.glob("../backupBotForReported*"):
+    for filename in glob.glob("./backupBotForReported*"):
         os.remove(filename)
     # compress db
     db_management.DB.execute_sql("VACUUM")
-
     db_management.DB.close()
-    zip_name = shutil.make_archive(
-        base_name=f"../backupBotForReported{int(time.time())}", format="zip",
-    )
+
+    backup_name = f"backupBotForReported{int(time.time())}.tar.xz"
+    with tarfile.TarFile(backup_name, "w:xz") as f_tar_xz:
+        for folderName, subfolders, filenames in os.walk("./"):
+            for filename in filenames:
+                filePath = os.path.join(folderName, filename)
+                if not filePath.endswith(".tar.xz"):
+                    # exclude other backups
+                    f_tar_xz.write(filePath)
+
     db_management.DB.connect(reuse_if_open=True)
-    return zip_name
+    return backup_name
 
 
 def SendBackup(client: pyrogram.Client):
@@ -130,11 +137,11 @@ def SendBackup(client: pyrogram.Client):
         disable_notification=True,
     )
 
-    zip_name = Backup()
+    backup_name = Backup()
 
     client.send_document(
         chat_id=config["master"],
-        document=zip_name,
+        document=backup_name,
         disable_notification=True,
         progress=DFromUToTelegramProgress,
         progress_args=(tmp_msg, "I am sending the automatic backup.", time.time()),
