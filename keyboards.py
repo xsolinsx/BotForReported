@@ -68,7 +68,7 @@ def BuildPager(page: int, n_items: int, max_items_keyboard: int) -> list:
         # select page button
         page_shift_row.append(
             pyrogram.InlineKeyboardButton(
-                str(page + 1) + "/" + str(math.ceil(n_items / max_items_keyboard)),
+                f"{page + 1}/{math.ceil(n_items / max_items_keyboard)}",
                 callback_data=f"FMpages",
             )
         )

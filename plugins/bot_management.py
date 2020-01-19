@@ -47,7 +47,7 @@ def CmdExec(client: pyrogram.Client, msg: pyrogram.Message):
     if expression:
         text = None
         try:
-            text = str(exec(expression, {"client": client, "msg": msg}))
+            text = str(exec(expression, dict(client=client, msg=msg)))
         except Exception as error:
             text = str(error)
 
@@ -72,7 +72,7 @@ def CmdEval(client: pyrogram.Client, msg: pyrogram.Message):
     if expression:
         text = None
         try:
-            text = str(eval(expression, {"client": client, "msg": msg}))
+            text = str(eval(expression, dict(client=client, msg=msg)))
         except Exception as error:
             text = str(error)
         if text:
@@ -94,36 +94,30 @@ def CMDBlock(client: pyrogram.Client, msg: pyrogram.Message):
     users_to_block = list()
     if msg.reply_to_message:
         if msg.reply_to_message.forward_from:
-            users_to_block.append(msg.reply_to_message.forward_from)
+            users_to_block.append(msg.reply_to_message.forward_from.id)
         elif msg.reply_to_message.text.find("(#user") != -1:
             users_to_block.append(
-                client.get_chat(
-                    chat_id=int(
-                        msg.reply_to_message.text[
-                            msg.reply_to_message.text.find("(#user")
-                            + 6 : msg.reply_to_message.text.find(")")
-                        ]
-                    )
+                int(
+                    msg.reply_to_message.text[
+                        msg.reply_to_message.text.find("(#user")
+                        + 6 : msg.reply_to_message.text.find(")")
+                    ]
                 )
             )
     else:
         msg.command.remove(msg.command[0])
         for usr in msg.command:
-            obj = client.get_chat(chat_id=usr)
-            if isinstance(obj=obj, class_or_tuple=pyrogram.Users):
-                users_to_block.append(obj)
+            if utils.IsInt(usr):
+                users_to_block.append(usr)
 
     txt = ""
     for usr in users_to_block:
-        db_management.Users.replace(
-            id=usr.id,
-            first_name=usr.first_name,
-            last_name=usr.first_name,
-            username=usr.username,
-            is_blocked=True,
-        ).execute()
-        txt += f"(#user{usr.id}) {usr.first_name}\n"
-        client.send_message(chat_id=usr.id, text="You have been blocked.")
+        user: db_management.Users = db_management.Users.get_or_none(id=usr)
+        if user:
+            user.is_blocked = True
+            user.save()
+            txt += f"(#user{usr.id}) {usr.first_name}\n"
+            client.send_message(chat_id=usr.id, text="You have been blocked.")
 
     msg.reply_text(text=f"Blocked users:\n{txt}", disable_notification=False)
 
@@ -136,35 +130,29 @@ def CMDUnblock(client: pyrogram.Client, msg: pyrogram.Message):
     users_to_unblock = list()
     if msg.reply_to_message:
         if msg.reply_to_message.forward_from:
-            users_to_unblock.append(msg.reply_to_message.forward_from)
+            users_to_unblock.append(msg.reply_to_message.forward_from.id)
         elif msg.reply_to_message.text.find("(#user") != -1:
             users_to_unblock.append(
-                client.get_chat(
-                    chat_id=int(
-                        msg.reply_to_message.text[
-                            msg.reply_to_message.text.find("(#user")
-                            + 6 : msg.reply_to_message.text.find(")")
-                        ]
-                    )
+                int(
+                    msg.reply_to_message.text[
+                        msg.reply_to_message.text.find("(#user")
+                        + 6 : msg.reply_to_message.text.find(")")
+                    ]
                 )
             )
     else:
         msg.command.remove(msg.command[0])
         for usr in msg.command:
-            obj = client.get_chat(chat_id=usr)
-            if isinstance(obj=obj, class_or_tuple=pyrogram.Users):
-                users_to_unblock.append(obj)
+            if utils.IsInt(usr):
+                users_to_unblock.append(usr)
 
     txt = ""
     for usr in users_to_unblock:
-        db_management.Users.replace(
-            id=usr.id,
-            first_name=usr.first_name,
-            last_name=usr.first_name,
-            username=usr.username,
-            is_blocked=False,
-        ).execute()
-        txt += f"(#user{usr.id}) {usr.first_name}\n"
-        client.send_message(chat_id=usr.id, text="You have been unblocked.")
+        user: db_management.Users = db_management.Users.get_or_none(id=usr)
+        if user:
+            user.is_blocked = False
+            user.save()
+            txt += f"(#user{usr.id}) {usr.first_name}\n"
+            client.send_message(chat_id=usr.id, text="You have been unblocked.")
 
     msg.reply_text(text=f"Unblocked users:\n{txt}", disable_notification=False)

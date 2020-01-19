@@ -1,9 +1,0 @@
-syntax: glob
-*.code-workspace
-.db*
-MyBotForReported.db*
-*.session
-unknown_errors.txt
-config.json
-.venv/
-__pycache__/

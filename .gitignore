@@ -1,7 +1,30 @@
-config.json
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# bot files
 *.session
+*.session-journal
 *.db
 *.db-shm
 *.db-wal
-.vscode/
+config.json
+unknown_errors.txt
+backup*.tar.xz
+
+# vscode
 *.code-workspace
+.vscode/

@@ -68,7 +68,7 @@ APP.send_message(
 )
 # schedule backup at 04:00 with a random delay between ± 10 minutes
 scheduler.add_job(
-    utils.SendBackup, kwargs={"client": APP}, trigger=CronTrigger(hour=4, jitter=600),
+    utils.SendBackup, kwargs=dict(client=APP), trigger=CronTrigger(hour=4, jitter=600),
 )
 APP.idle()
 APP.stop()

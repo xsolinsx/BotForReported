@@ -38,7 +38,7 @@ class Users(peewee.Model):
     is_blocked = peewee.BooleanField(
         default=False,
         null=False,
-        constraints=[peewee.Check(constraint="is_blocked == 0 OR is_blocked == 1")],
+        constraints=[peewee.Check(constraint="is_blocked BETWEEN 0 AND 1")],
     )
 
     class Meta:

@@ -118,13 +118,17 @@ def Backup() -> str:
     db_management.DB.close()
 
     backup_name = f"backupBotForReported{int(time.time())}.tar.xz"
-    with tarfile.TarFile(backup_name, "w:xz") as f_tar_xz:
+    with tarfile.open(backup_name, mode="w:xz") as f_tar_xz:
         for folderName, subfolders, filenames in os.walk("./"):
-            for filename in filenames:
-                filePath = os.path.join(folderName, filename)
-                if not filePath.endswith(".tar.xz"):
-                    # exclude other backups
-                    f_tar_xz.write(filePath)
+            if not folderName.startswith("./.git"):
+                for filename in filenames:
+                    if filename != backup_name and not (
+                        filename.endswith(".session")
+                        or filename.endswith(".session-journal")
+                    ):
+                        # exclude current backup and session files
+                        filePath = os.path.join(folderName, filename)
+                        f_tar_xz.add(filePath)
 
     db_management.DB.connect(reuse_if_open=True)
     return backup_name
@@ -169,15 +173,15 @@ def SizeFormatter(b: int, human_readable: bool = False) -> str:
         TB = float(pow(KB, 4))
 
         if B < KB:
-            return "{0} B".format(B)
+            return f"{B} B"
         elif KB <= B < MB:
-            return "{0:.2f} KB".format(B / KB)
+            return f"{B/KB:.2f} KB"
         elif MB <= B < GB:
-            return "{0:.2f} MB".format(B / MB)
+            return f"{B/MB:.2f} MB"
         elif GB <= B < TB:
-            return "{0:.2f} GB".format(B / GB)
+            return f"{B/GB:.2f} GB"
         elif TB <= B:
-            return "{0:.2f} TB".format(B / TB)
+            return f"{B/TB:.2f} TB"
     else:
         B, b = divmod(int(b), 8)
         KB, B = divmod(B, 1024)
@@ -185,12 +189,12 @@ def SizeFormatter(b: int, human_readable: bool = False) -> str:
         GB, MB = divmod(MB, 1024)
         TB, GB = divmod(GB, 1024)
         tmp = (
-            ((str(TB) + "TB, ") if TB > 0 else "")
-            + ((str(GB) + "GB, ") if GB > 0 else "")
-            + ((str(MB) + "MB, ") if MB > 0 else "")
-            + ((str(KB) + "KB, ") if KB > 0 else "")
-            + ((str(B) + "B, ") if B > 0 else "")
-            + ((str(b) + "b, ") if b > 0 else "")
+            ((f"{TB}TB, ") if TB else "")
+            + ((f"{GB}GB, ") if GB else "")
+            + ((f"{MB}MB, ") if MB else "")
+            + ((f"{KB}KB, ") if KB else "")
+            + ((f"{B}B, ") if B else "")
+            + ((f"{b}b, ") if b else "")
         )
         return tmp[:-2]
 
@@ -209,11 +213,11 @@ def TimeFormatter(milliseconds: int) -> str:
     hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
     tmp = (
-        ((str(days) + "d, ") if days > 0 else "")
-        + ((str(hours) + "h, ") if hours > 0 else "")
-        + ((str(minutes) + "m, ") if minutes > 0 else "")
-        + ((str(seconds) + "s, ") if seconds > 0 else "")
-        + ((str(milliseconds) + "ms, ") if milliseconds > 0 else "")
+        ((f"{days}d, ") if days else "")
+        + ((f"{hours}h, ") if hours else "")
+        + ((f"{minutes}m, ") if minutes else "")
+        + ((f"{seconds}s, ") if seconds else "")
+        + ((f"{milliseconds}ms, ") if milliseconds else "")
     )
     return tmp[:-2]
 

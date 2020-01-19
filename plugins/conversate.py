@@ -100,47 +100,51 @@ def CMDStart(client: pyrogram.Client, msg: pyrogram.Message):
         msg.continue_propagation()
 
 
-@pyrogram.Client.on_message(pyrogram.Filters.private)
-def BasicHandler(client: pyrogram.Client, msg: pyrogram.Message):
+@pyrogram.Client.on_message(
+    pyrogram.Filters.private & pyrogram.Filters.user(utils.config["master"])
+)
+def BasicHandlerMaster(client: pyrogram.Client, msg: pyrogram.Message):
     global last_user
-    if msg.from_user.id == utils.config["master"]:
-        if msg.reply_to_message:
-            if msg.reply_to_message.forward_from:
-                last_user = msg.reply_to_message.forward_from
-            elif msg.reply_to_message.text.find("(#user") != -1:
-                last_user = client.get_chat(
-                    chat_id=int(
-                        msg.reply_to_message.text[
-                            msg.reply_to_message.text.find("(#user")
-                            + 6 : msg.reply_to_message.text.find(")")
-                        ]
-                    )
+    if msg.reply_to_message:
+        if msg.reply_to_message.forward_from:
+            last_user = msg.reply_to_message.forward_from
+        elif msg.reply_to_message.text.find("(#user") != -1:
+            last_user = client.get_chat(
+                chat_id=int(
+                    msg.reply_to_message.text[
+                        msg.reply_to_message.text.find("(#user")
+                        + 6 : msg.reply_to_message.text.find(")")
+                    ]
                 )
-        if last_user:
-            try:
-                msg.forward(chat_id=last_user.id, disable_notification=False)
-                client.send_chat_action(chat_id=utils.config["master"], action="typing")
-            except pyrogram.errors.UserIsBlocked:
-                msg.reply_text(
-                    text=f"{last_user.id} blocked me.\n", disable_notification=False
-                )
-            except pyrogram.errors.PeerIdInvalid:
-                msg.reply_text(
-                    text=f"Cannot write to {last_user.id}, never encountered.\n",
-                    disable_notification=False,
-                )
-            except Exception as ex:
-                msg.reply_text(text=str(ex), disable_notification=False)
-        else:
+            )
+    if last_user:
+        try:
+            msg.forward(chat_id=last_user.id, disable_notification=False)
+            client.send_chat_action(chat_id=utils.config["master"], action="typing")
+        except pyrogram.errors.UserIsBlocked:
             msg.reply_text(
-                text="Need to have last_user OR to reply to a forwarded message OR to reply to a message with the #user hashtag!",
+                text=f"{last_user.id} blocked me.\n", disable_notification=False
+            )
+        except pyrogram.errors.PeerIdInvalid:
+            msg.reply_text(
+                text=f"Cannot write to {last_user.id}, never encountered.\n",
                 disable_notification=False,
             )
+        except Exception as ex:
+            msg.reply_text(text=str(ex), disable_notification=False)
     else:
-        msg.forward(chat_id=utils.config["master"], disable_notification=False)
-        client.send_message(
-            chat_id=utils.config["master"],
-            text=f"↑ (#user{msg.from_user.id}) {msg.from_user.first_name} ↑",
-            disable_notification=True,
+        msg.reply_text(
+            text="Need to have last_user OR to reply to a forwarded message OR to reply to a message with the #user hashtag!",
+            disable_notification=False,
         )
-        client.send_chat_action(chat_id=msg.from_user.id, action="typing")
+
+
+@pyrogram.Client.on_message(pyrogram.Filters.private)
+def BasicHandlerOthers(client: pyrogram.Client, msg: pyrogram.Message):
+    msg.forward(chat_id=utils.config["master"], disable_notification=False)
+    client.send_message(
+        chat_id=utils.config["master"],
+        text=f"↑ (#user{msg.from_user.id}) {msg.from_user.first_name} ↑",
+        disable_notification=True,
+    )
+    client.send_chat_action(chat_id=msg.from_user.id, action="typing")
