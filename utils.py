@@ -120,7 +120,7 @@ def Backup() -> str:
     backup_name = f"backupBotForReported{int(time.time())}.tar.xz"
     with tarfile.open(backup_name, mode="w:xz") as f_tar_xz:
         for folderName, subfolders, filenames in os.walk("./"):
-            if not folderName.startswith("./.git"):
+            if not (folderName.startswith("./.git") or "__pycache__" in folderName):
                 for filename in filenames:
                     if filename != backup_name and not (
                         filename.endswith(".session")
