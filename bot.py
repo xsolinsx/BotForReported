@@ -7,6 +7,7 @@ import pyrogram
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
+import db_management
 import utils
 
 start_string = "{bot_version}\n{bot_data}"
@@ -72,3 +73,5 @@ scheduler.add_job(
 )
 APP.idle()
 APP.stop()
+
+db_management.DB.close()
