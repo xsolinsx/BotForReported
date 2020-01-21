@@ -1,4 +1,5 @@
 import datetime
+import time
 
 import pyrogram
 
@@ -7,6 +8,9 @@ import db_management
 
 @pyrogram.Client.on_message(pyrogram.Filters.private, group=-2)
 def PreProcessMessage(client: pyrogram.Client, msg: pyrogram.Message):
+    # as this is the first handler of this type, if the db is locked wait
+    while db_management.DB.is_stopped():
+        time.sleep(1)
     if db_management.Users.get_or_none(id=msg.from_user.id):
         db_management.Users.update(
             first_name=msg.from_user.first_name if msg.from_user.first_name else "",

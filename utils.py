@@ -115,22 +115,22 @@ def Backup() -> str:
         os.remove(filename)
     # compress db
     db_management.DB.execute_sql("VACUUM")
-    db_management.DB.close()
-
+    db_management.DB.stop()
     backup_name = f"backupBotForReported{int(time.time())}.tar.xz"
     with tarfile.open(backup_name, mode="w:xz") as f_tar_xz:
-        for folderName, subfolders, filenames in os.walk("./"):
-            if not (folderName.startswith("./.git") or "__pycache__" in folderName):
+        for folder_name, subfolders, filenames in os.walk("./"):
+            if not (folder_name.startswith("./.git") or "__pycache__" in folder_name):
                 for filename in filenames:
                     if filename != backup_name and not (
                         filename.endswith(".session")
                         or filename.endswith(".session-journal")
                     ):
                         # exclude current backup and session files
-                        filePath = os.path.join(folderName, filename)
-                        f_tar_xz.add(filePath)
+                        file_path = os.path.join(folder_name, filename)
+                        print(file_path)
+                        f_tar_xz.add(file_path)
+    db_management.DB.start()
 
-    db_management.DB.connect(reuse_if_open=True)
     return backup_name
 
 
