@@ -22,6 +22,7 @@ def CMDGetLastUser(client: pyrogram.Client, msg: pyrogram.Message):
         ),
         disable_notification=False,
     )
+    msg.stop_propagation()
 
 
 @pyrogram.Client.on_message(
@@ -62,15 +63,16 @@ def CMDTestChat(client: pyrogram.Client, msg: pyrogram.Message):
             txt += f"Cannot write to {cht} {ex}\n"
 
     msg.reply_text(text=txt, disable_notification=False)
+    msg.stop_propagation()
 
 
 @pyrogram.Client.on_message(
-    pyrogram.Filters.command("start", prefixes=["/", "!", "#", "."])
+    pyrogram.Filters.user(utils.config["master"])
+    & pyrogram.Filters.command(["start", "help"], prefixes=["/", "!", "#", "."])
 )
-def CMDStart(client: pyrogram.Client, msg: pyrogram.Message):
-    if msg.from_user.id == utils.config["master"]:
-        msg.reply_text(
-            text="""<code>/start</code> Shows this message
+def CMDStart_HelpMaster(client: pyrogram.Client, msg: pyrogram.Message):
+    msg.reply_text(
+        text="""<code>/start</code> Shows this message
 
 <code>/test {reply_from}|{chats}</code> Tests the specified chat(s)
 
@@ -89,19 +91,14 @@ def CMDStart(client: pyrogram.Client, msg: pyrogram.Message):
 <code>/block {reply_from}|{users}</code> Blocks the specified user(s)
 
 <code>/unblock {reply_from}|{users}</code> Unblocks the specified user(s)""",
-            disable_notification=False,
-            parse_mode="html",
-        )
-    else:
-        msg.reply_text(
-            text=f"Hi, use this bot to talk to {client.MASTER.first_name} {client.MASTER.last_name if client.MASTER.last_name else ''}, @{client.MASTER.username if client.MASTER.username else ''} ({client.MASTER.id})",
-            disable_notification=False,
-        )
-        msg.continue_propagation()
+        disable_notification=False,
+        parse_mode="html",
+    )
+    msg.stop_propagation()
 
 
 @pyrogram.Client.on_message(
-    pyrogram.Filters.private & pyrogram.Filters.user(utils.config["master"])
+    pyrogram.Filters.user(utils.config["master"]) & pyrogram.Filters.private, group=1
 )
 def BasicHandlerMaster(client: pyrogram.Client, msg: pyrogram.Message):
     global last_user
@@ -139,7 +136,20 @@ def BasicHandlerMaster(client: pyrogram.Client, msg: pyrogram.Message):
         )
 
 
-@pyrogram.Client.on_message(pyrogram.Filters.private)
+@pyrogram.Client.on_message(
+    ~pyrogram.Filters.user(utils.config["master"])
+    & pyrogram.Filters.command(["start", "help"], prefixes=["/", "!", "#", "."])
+)
+def CMDStart_HelpOthers(client: pyrogram.Client, msg: pyrogram.Message):
+    msg.reply_text(
+        text=f"Hi, use this bot to talk to {client.MASTER.first_name} {client.MASTER.last_name if client.MASTER.last_name else ''}, @{client.MASTER.username if client.MASTER.username else ''} ({client.MASTER.id})",
+        disable_notification=False,
+    )
+
+
+@pyrogram.Client.on_message(
+    ~pyrogram.Filters.user(utils.config["master"]) & pyrogram.Filters.private, group=1
+)
 def BasicHandlerOthers(client: pyrogram.Client, msg: pyrogram.Message):
     msg.forward(chat_id=utils.config["master"], disable_notification=False)
     client.send_message(

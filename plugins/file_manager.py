@@ -238,3 +238,4 @@ def CmdFileManager(client: pyrogram.Client, msg: pyrogram.Message):
             )
         ),
     )
+    msg.stop_propagation()
