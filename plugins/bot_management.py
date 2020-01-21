@@ -95,7 +95,7 @@ def CmdEval(client: pyrogram.Client, msg: pyrogram.Message):
     pyrogram.Filters.chat(utils.config["master"])
     & pyrogram.Filters.command("block", prefixes=["/", "!", "#", "."])
 )
-def CMDBlock(client: pyrogram.Client, msg: pyrogram.Message):
+def CmdBlock(client: pyrogram.Client, msg: pyrogram.Message):
     users_to_block = list()
     if msg.reply_to_message:
         if msg.reply_to_message.forward_from:
@@ -132,7 +132,7 @@ def CMDBlock(client: pyrogram.Client, msg: pyrogram.Message):
     pyrogram.Filters.chat(utils.config["master"])
     & pyrogram.Filters.command("unblock", prefixes=["/", "!", "#", "."])
 )
-def CMDUnblock(client: pyrogram.Client, msg: pyrogram.Message):
+def CmdUnblock(client: pyrogram.Client, msg: pyrogram.Message):
     users_to_unblock = list()
     if msg.reply_to_message:
         if msg.reply_to_message.forward_from:
