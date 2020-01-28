@@ -6,13 +6,14 @@ import time
 import pyrogram
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
+from pytz import utc
 
 import db_management
 import utils
 
 start_string = "{bot_version}\n{bot_data}"
 
-scheduler = BackgroundScheduler()
+scheduler = BackgroundScheduler(timezone=utc)
 scheduler.start()
 
 
@@ -67,9 +68,11 @@ APP.send_message(
     + f"\n\n<b>{len(loaded_plugins)} plugins loaded</b>",
     parse_mode="html",
 )
-# schedule backup at 04:00 with a random delay between ± 10 minutes
+# schedule backup at UTC 02:30 with a random delay between ± 10 minutes
 scheduler.add_job(
-    utils.SendBackup, kwargs=dict(client=APP), trigger=CronTrigger(hour=4, jitter=600),
+    utils.SendBackup,
+    trigger=CronTrigger(hour=2, minute=30, jitter=600, timezone=utc),
+    kwargs=dict(client=APP),
 )
 APP.idle()
 APP.stop()
