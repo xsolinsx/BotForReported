@@ -1,5 +1,5 @@
 {
-    "database": "BotForReported.db",
+    "database": "bot.db",
     "master": 123456789,
     "file_manager": {
         "path": "/",

@@ -10,12 +10,42 @@ import time
 import typing
 
 import pyrogram
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+from pytz import utc
 
 import db_management
+
+scheduler = BackgroundScheduler(timezone=utc)
+scheduler.start()
 
 config = None
 with open(file="config.json", encoding="utf-8") as f:
     config = json.load(fp=f)
+
+flood = dict()
+
+
+def InstantiateFloodDictionary(chat_id: int):
+    # if chat_id not registered into the flood table register it
+    if chat_id not in flood:
+        flood[chat_id] = {}
+        flood[chat_id]["times"] = list()
+        flood[chat_id]["flood_wait_expiry_date"] = 0
+        # from 0 to X minutes of wait depending on how much of an idiot is the user
+        flood[chat_id]["flood_wait_minutes"] = 0
+        # to know if id has been warned
+        flood[chat_id]["warned"] = False
+
+
+def CleanFloodDict():
+    global flood
+    flood = dict()
+
+
+scheduler.add_job(
+    CleanFloodDict, trigger=CronTrigger(hour=3, timezone=utc),
+)
 
 
 def IsInt(v) -> bool:
