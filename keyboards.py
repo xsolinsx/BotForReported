@@ -192,7 +192,7 @@ def BuildItemsKeyboard(
                         callback_data=f"FM{i}" if path else f"FMcddrive{i}",
                     )
                 )
-            if sum([len(row) for row in keyboard]) >= max_items_keyboard:
+            if sum(len(row) for row in keyboard) >= max_items_keyboard:
                 break
 
     footer = BuildPager(page, len(items), max_items_keyboard)
