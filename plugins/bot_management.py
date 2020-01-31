@@ -111,9 +111,7 @@ def CmdBlock(client: pyrogram.Client, msg: pyrogram.Message):
             )
     else:
         msg.command.remove(msg.command[0])
-        for usr in msg.command:
-            if utils.IsInt(usr):
-                users_to_block.append(usr)
+        users_to_block = filter(utils.IsInt, msg.command)
 
     txt = ""
     for usr in users_to_block:
@@ -148,9 +146,7 @@ def CmdUnblock(client: pyrogram.Client, msg: pyrogram.Message):
             )
     else:
         msg.command.remove(msg.command[0])
-        for usr in msg.command:
-            if utils.IsInt(usr):
-                users_to_unblock.append(usr)
+        users_to_unblock = filter(utils.IsInt, msg.command)
 
     txt = ""
     for usr in users_to_unblock:

@@ -45,15 +45,12 @@ def CmdTestChat(client: pyrogram.Client, msg: pyrogram.Message):
             )
     else:
         msg.command.remove(msg.command[0])
-        for cht in msg.command:
-            chats_to_test.append(cht)
+        chats_to_test = filter(utils.IsInt, msg.command)
 
     txt = ""
     for cht in chats_to_test:
         try:
-            client.send_chat_action(
-                chat_id=cht if not utils.IsInt(cht) else int(cht), action="typing"
-            )
+            client.send_chat_action(chat_id=int(cht), action="typing")
             txt += f"Can write to {cht}\n"
         except pyrogram.errors.UserIsBlocked:
             txt += f"{cht} blocked me\n"
