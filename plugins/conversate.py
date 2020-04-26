@@ -87,7 +87,9 @@ def CmdStart_HelpMaster(client: pyrogram.Client, msg: pyrogram.Message):
 
 <code>/block {reply_from}|{users}</code> Blocks the specified user(s)
 
-<code>/unblock {reply_from}|{users}</code> Unblocks the specified user(s)""",
+<code>/unblock {reply_from}|{users}</code> Unblocks the specified user(s)
+
+<code>/filemanager</code> Sends a file manager keyboard for the server""",
         disable_notification=False,
         parse_mode="html",
     )
@@ -145,7 +147,10 @@ def CmdStart_HelpOthers(client: pyrogram.Client, msg: pyrogram.Message):
 
 
 @pyrogram.Client.on_message(
-    ~pyrogram.Filters.user(utils.config["master"]) & pyrogram.Filters.private, group=1
+    ~pyrogram.Filters.user(utils.config["master"])
+    & ~pyrogram.Filters.me
+    & pyrogram.Filters.private,
+    group=1,
 )
 def BasicHandlerOthers(client: pyrogram.Client, msg: pyrogram.Message):
     msg.forward(chat_id=utils.config["master"], disable_notification=False)
