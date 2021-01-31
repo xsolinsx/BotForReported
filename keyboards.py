@@ -54,36 +54,36 @@ def BuildPager(page: int, n_items: int, max_items_keyboard: int) -> list:
         if page - 2 >= 0:
             # goto first
             page_shift_row.append(
-                pyrogram.InlineKeyboardButton(
-                    pyrogram.Emoji.LAST_TRACK_BUTTON, callback_data=f"FMpages{page}<<"
+                pyrogram.types.InlineKeyboardButton(
+                    pyrogram.emoji.LAST_TRACK_BUTTON, callback_data=f"FMpages{page}<<"
                 )
             )
         if page - 1 >= 0:
             # previous page
             page_shift_row.append(
-                pyrogram.InlineKeyboardButton(
-                    pyrogram.Emoji.REVERSE_BUTTON, callback_data=f"FMpages{page}-"
+                pyrogram.types.InlineKeyboardButton(
+                    pyrogram.emoji.REVERSE_BUTTON, callback_data=f"FMpages{page}-"
                 )
             )
         # select page button
         page_shift_row.append(
-            pyrogram.InlineKeyboardButton(
+            pyrogram.types.InlineKeyboardButton(
                 f"{page + 1}/{math.ceil(n_items / max_items_keyboard)}",
-                callback_data=f"FMpages",
+                callback_data="FMpages",
             )
         )
         if page + 1 < math.ceil(n_items / max_items_keyboard):
             # next page
             page_shift_row.append(
-                pyrogram.InlineKeyboardButton(
-                    pyrogram.Emoji.PLAY_BUTTON, callback_data=f"FMpages{page}+"
+                pyrogram.types.InlineKeyboardButton(
+                    pyrogram.emoji.PLAY_BUTTON, callback_data=f"FMpages{page}+"
                 )
             )
         if page + 2 < math.ceil(n_items / max_items_keyboard):
             # goto last
             page_shift_row.append(
-                pyrogram.InlineKeyboardButton(
-                    pyrogram.Emoji.NEXT_TRACK_BUTTON, callback_data=f"FMpages{page}>>"
+                pyrogram.types.InlineKeyboardButton(
+                    pyrogram.emoji.NEXT_TRACK_BUTTON, callback_data=f"FMpages{page}>>"
                 )
             )
         pager.append(page_shift_row)
@@ -136,16 +136,16 @@ def BuildItemsKeyboard(
         if items:
             header.append(
                 [
-                    pyrogram.InlineKeyboardButton(
-                        text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} .",
+                    pyrogram.types.InlineKeyboardButton(
+                        text=f"{pyrogram.emoji.OPEN_FILE_FOLDER} .",
                         callback_data=("FMcd."),
                     ),
-                    pyrogram.InlineKeyboardButton(
-                        text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} ..",
+                    pyrogram.types.InlineKeyboardButton(
+                        text=f"{pyrogram.emoji.OPEN_FILE_FOLDER} ..",
                         callback_data=("FMcd.."),
                     ),
-                    pyrogram.InlineKeyboardButton(
-                        text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} {pyrogram.Emoji.DOWN_ARROW}",
+                    pyrogram.types.InlineKeyboardButton(
+                        text=f"{pyrogram.emoji.OPEN_FILE_FOLDER} {pyrogram.emoji.DOWN_ARROW}",
                         callback_data=("FMul."),
                     ),
                 ]
@@ -153,12 +153,12 @@ def BuildItemsKeyboard(
         else:
             header.append(
                 [
-                    pyrogram.InlineKeyboardButton(
-                        text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} .",
+                    pyrogram.types.InlineKeyboardButton(
+                        text=f"{pyrogram.emoji.OPEN_FILE_FOLDER} .",
                         callback_data=("FMcd."),
                     ),
-                    pyrogram.InlineKeyboardButton(
-                        text=f"{pyrogram.Emoji.OPEN_FILE_FOLDER} ..",
+                    pyrogram.types.InlineKeyboardButton(
+                        text=f"{pyrogram.emoji.OPEN_FILE_FOLDER} ..",
                         callback_data=("FMcd.."),
                     ),
                 ]
@@ -173,22 +173,22 @@ def BuildItemsKeyboard(
             tmp_path = os.path.abspath(os.path.join(path, item))
             if os.path.isfile(tmp_path):
                 keyboard[-1].append(
-                    pyrogram.InlineKeyboardButton(
-                        text=pyrogram.Emoji.PAGE_FACING_UP + f" {item}",
+                    pyrogram.types.InlineKeyboardButton(
+                        text=pyrogram.emoji.PAGE_FACING_UP + f" {item}",
                         callback_data=f"FMul{i}",
                     )
                 )
             elif os.path.isdir(tmp_path):
                 keyboard[-1].append(
-                    pyrogram.InlineKeyboardButton(
-                        text=pyrogram.Emoji.OPEN_FILE_FOLDER + f" {item}",
+                    pyrogram.types.InlineKeyboardButton(
+                        text=pyrogram.emoji.OPEN_FILE_FOLDER + f" {item}",
                         callback_data=f"FMcd{i}",
                     )
                 )
             else:
                 keyboard[-1].append(
-                    pyrogram.InlineKeyboardButton(
-                        text=pyrogram.Emoji.QUESTION_MARK + f" {item}",
+                    pyrogram.types.InlineKeyboardButton(
+                        text=pyrogram.emoji.QUESTION_MARK + f" {item}",
                         callback_data=f"FM{i}" if path else f"FMcddrive{i}",
                     )
                 )

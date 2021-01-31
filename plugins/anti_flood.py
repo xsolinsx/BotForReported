@@ -6,8 +6,8 @@ import pyrogram
 import utils
 
 
-@pyrogram.Client.on_message(pyrogram.Filters.private, group=-1)
-def MessagesAntiFlood(client: pyrogram.Client, msg: pyrogram.Message):
+@pyrogram.Client.on_message(pyrogram.filters.private, group=-1)
+def MessagesAntiFlood(client: pyrogram.Client, msg: pyrogram.types.Message):
     if msg.from_user.id == utils.config["master"]:
         return
 

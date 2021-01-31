@@ -14,14 +14,13 @@ import utils
 
 
 @pyrogram.Client.on_callback_query(
-    pyrogram.Filters.user(utils.config["master"])
-    & pyrogram.Filters.callback_data("FMcd.")
+    pyrogram.filters.user(utils.config["master"]) & pyrogram.filters.regex(r"^FMcd\.")
 )
-def CbQryUpdateFolder(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery):
+def CbQryUpdateFolder(client: pyrogram.Client, cb_qry: pyrogram.types.CallbackQuery):
     cb_qry.answer(text="Updating folder...")
     cb_qry.edit_message_text(
         text="Path: " + utils.config["file_manager"]["path"],
-        reply_markup=pyrogram.InlineKeyboardMarkup(
+        reply_markup=pyrogram.types.InlineKeyboardMarkup(
             keyboards.BuildItemsKeyboard(
                 path=utils.config["file_manager"]["path"],
                 page=utils.config["file_manager"]["page"],
@@ -33,10 +32,9 @@ def CbQryUpdateFolder(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery):
 
 
 @pyrogram.Client.on_callback_query(
-    pyrogram.Filters.user(utils.config["master"])
-    & pyrogram.Filters.callback_data("FMcd..")
+    pyrogram.filters.user(utils.config["master"]) & pyrogram.filters.regex(r"^FMcd\.\.")
 )
-def CbQryPreviousFolder(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery):
+def CbQryPreviousFolder(client: pyrogram.Client, cb_qry: pyrogram.types.CallbackQuery):
     if utils.config["file_manager"]["path"][1:].endswith(":\\"):
         utils.config["file_manager"]["path"] = "/"
     else:
@@ -48,7 +46,7 @@ def CbQryPreviousFolder(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery)
     cb_qry.answer(text="Moving to " + utils.config["file_manager"]["path"])
     cb_qry.edit_message_text(
         text="Path: " + utils.config["file_manager"]["path"],
-        reply_markup=pyrogram.InlineKeyboardMarkup(
+        reply_markup=pyrogram.types.InlineKeyboardMarkup(
             keyboards.BuildItemsKeyboard(
                 path=utils.config["file_manager"]["path"],
                 page=utils.config["file_manager"]["page"],
@@ -63,10 +61,10 @@ def CbQryPreviousFolder(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery)
 
 
 @pyrogram.Client.on_callback_query(
-    pyrogram.Filters.user(utils.config["master"])
+    pyrogram.filters.user(utils.config["master"])
     & utils.filter_callback_regex(r"FMcddrive(.+)", flags=re.I)
 )
-def CbQryCdDrive(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery):
+def CbQryCdDrive(client: pyrogram.Client, cb_qry: pyrogram.types.CallbackQuery):
     utils.config["file_manager"]["path"] = (
         utils.GetDrives()[int(cb_qry.data.replace("FMcddrive", ""))] + ":\\"
     )
@@ -75,7 +73,7 @@ def CbQryCdDrive(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery):
     cb_qry.answer(text="Moving to drive " + utils.config["file_manager"]["path"])
     cb_qry.edit_message_text(
         text="Path: " + utils.config["file_manager"]["path"],
-        reply_markup=pyrogram.InlineKeyboardMarkup(
+        reply_markup=pyrogram.types.InlineKeyboardMarkup(
             keyboards.BuildItemsKeyboard(
                 path=utils.config["file_manager"]["path"],
                 page=utils.config["file_manager"]["page"],
@@ -90,10 +88,10 @@ def CbQryCdDrive(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery):
 
 
 @pyrogram.Client.on_callback_query(
-    pyrogram.Filters.user(utils.config["master"])
+    pyrogram.filters.user(utils.config["master"])
     & utils.filter_callback_regex(r"FMcd(\d+)", flags=re.I)
 )
-def CbQryCdFolder(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery):
+def CbQryCdFolder(client: pyrogram.Client, cb_qry: pyrogram.types.CallbackQuery):
     i = int(cb_qry.data.replace("FMcd", ""))
     folder = sorted(os.listdir(utils.config["file_manager"]["path"]))[i]
     utils.config["file_manager"]["path"] = os.path.abspath(
@@ -104,7 +102,7 @@ def CbQryCdFolder(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery):
     cb_qry.answer(text="Moving to " + utils.config["file_manager"]["path"])
     cb_qry.edit_message_text(
         text="Path: " + utils.config["file_manager"]["path"],
-        reply_markup=pyrogram.InlineKeyboardMarkup(
+        reply_markup=pyrogram.types.InlineKeyboardMarkup(
             keyboards.BuildItemsKeyboard(
                 path=utils.config["file_manager"]["path"],
                 page=utils.config["file_manager"]["page"],
@@ -119,10 +117,10 @@ def CbQryCdFolder(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery):
 
 
 @pyrogram.Client.on_callback_query(
-    pyrogram.Filters.user(utils.config["master"])
+    pyrogram.filters.user(utils.config["master"])
     & utils.filter_callback_regex(r"FMpages(\d+)(<<|\-|\+|>>)", flags=re.I)
 )
-def CbQryPagesMove(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery):
+def CbQryPagesMove(client: pyrogram.Client, cb_qry: pyrogram.types.CallbackQuery):
     items = os.listdir(utils.config["file_manager"]["path"])
     if cb_qry.data.endswith("<<"):
         utils.config["file_manager"]["page"] = 0
@@ -144,7 +142,7 @@ def CbQryPagesMove(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery):
 
     cb_qry.answer(text="Turning page...")
     cb_qry.edit_message_reply_markup(
-        reply_markup=pyrogram.InlineKeyboardMarkup(
+        reply_markup=pyrogram.types.InlineKeyboardMarkup(
             keyboards.BuildItemsKeyboard(
                 path=utils.config["file_manager"]["path"],
                 page=utils.config["file_manager"]["page"],
@@ -159,18 +157,16 @@ def CbQryPagesMove(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery):
 
 
 @pyrogram.Client.on_callback_query(
-    pyrogram.Filters.user(utils.config["master"])
-    & pyrogram.Filters.callback_data("FMpages")
+    pyrogram.filters.user(utils.config["master"]) & pyrogram.filters.regex(r"^FMpages")
 )
-def CbQryPages(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery):
+def CbQryPages(client: pyrogram.Client, cb_qry: pyrogram.types.CallbackQuery):
     cb_qry.answer(text="Useless button.")
 
 
 @pyrogram.Client.on_callback_query(
-    pyrogram.Filters.user(utils.config["master"])
-    & pyrogram.Filters.callback_data("FMul.")
+    pyrogram.filters.user(utils.config["master"]) & pyrogram.filters.regex(r"^FMul\.")
 )
-def CbQryUlFolder(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery):
+def CbQryUlFolder(client: pyrogram.Client, cb_qry: pyrogram.types.CallbackQuery):
     zip_name = str(pathlib.Path(utils.config["file_manager"]["path"]).name)
     zip_name = f"./downloads/{zip_name}"
     cb_qry.answer(text=f"Zipping and uploading {zip_name}")
@@ -182,7 +178,7 @@ def CbQryUlFolder(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery):
             base_dir=utils.config["file_manager"]["path"],
         )
 
-        tmpmsg: pyrogram.Message = cb_qry.message.reply_text(
+        tmpmsg: pyrogram.types.Message = cb_qry.message.reply_text(
             text="Uploading "
             + os.path.join(str(pathlib.Path(sys.argv[0]).parent), zip_name),
             quote=True,
@@ -199,16 +195,16 @@ def CbQryUlFolder(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery):
 
 
 @pyrogram.Client.on_callback_query(
-    pyrogram.Filters.user(utils.config["master"])
+    pyrogram.filters.user(utils.config["master"])
     & utils.filter_callback_regex(r"FMul(\d+)", flags=re.I)
 )
-def CbQryUlFile(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery):
+def CbQryUlFile(client: pyrogram.Client, cb_qry: pyrogram.types.CallbackQuery):
     i = int(cb_qry.data.replace("FMul", ""))
     file_name = sorted(os.listdir(utils.config["file_manager"]["path"]))[i]
 
     cb_qry.answer(text=f"Uploading {file_name}")
     try:
-        tmpmsg: pyrogram.Message = cb_qry.message.reply_text(
+        tmpmsg: pyrogram.types.Message = cb_qry.message.reply_text(
             text=f"Uploading {file_name}", quote=True
         )
         cb_qry.message.reply_document(
@@ -223,13 +219,13 @@ def CbQryUlFile(client: pyrogram.Client, cb_qry: pyrogram.CallbackQuery):
 
 
 @pyrogram.Client.on_message(
-    pyrogram.Filters.user(utils.config["master"])
-    & pyrogram.Filters.command("filemanager", prefixes=["/", "!", "#", "."])
+    pyrogram.filters.user(utils.config["master"])
+    & pyrogram.filters.command("filemanager", prefixes=["/", "!", "#", "."])
 )
-def CmdFileManager(client: pyrogram.Client, msg: pyrogram.Message):
+def CmdFileManager(client: pyrogram.Client, msg: pyrogram.types.Message):
     msg.reply_text(
         text="Path: " + utils.config["file_manager"]["path"],
-        reply_markup=pyrogram.InlineKeyboardMarkup(
+        reply_markup=pyrogram.types.InlineKeyboardMarkup(
             keyboards.BuildItemsKeyboard(
                 path=utils.config["file_manager"]["path"],
                 page=utils.config["file_manager"]["page"],

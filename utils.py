@@ -44,7 +44,8 @@ def CleanFloodDict():
 
 
 scheduler.add_job(
-    CleanFloodDict, trigger=CronTrigger(hour=3, timezone=utc),
+    CleanFloodDict,
+    trigger=CronTrigger(hour=3, timezone=utc),
 )
 
 
@@ -67,10 +68,10 @@ def IsInt(v) -> bool:
         return False
 
 
-def ExtractMedia(msg: pyrogram.Message) -> object:
-    """Extract the media from a :obj:`Message <pyrogram.Message>`.
+def ExtractMedia(msg: pyrogram.types.Message) -> object:
+    """Extract the media from a :obj:`Message <pyrogram.types.Message>`.
 
-    msg (:obj:`Message <pyrogram.Message>`): Message from which you want to extract the media
+    msg (:obj:`Message <pyrogram.types.Message>`): Message from which you want to extract the media
 
 
     SUCCESS Returns the media (``object``).
@@ -100,7 +101,7 @@ def ExtractMedia(msg: pyrogram.Message) -> object:
     return media
 
 
-def PrintUser(user: typing.Union[pyrogram.Chat, pyrogram.User]) -> str:
+def PrintUser(user: typing.Union[pyrogram.types.Chat, pyrogram.types.User]) -> str:
     return (
         (user.first_name + (f" {user.last_name}" if user.last_name else ""))
         + " ("
@@ -116,7 +117,7 @@ def filter_callback_regex(pattern: str, flags=None):
         pattern (``str``):
             The RegEx pattern as string, it will be applied to the text of a message. When a pattern matches,
             all the `Match Objects <https://docs.python.org/3/library/re.html#match-objects>`_
-            are stored in the *matches* field of the :class:`Message <pyrogram.Message>` itself.
+            are stored in the *matches* field of the :class:`Message <pyrogram.types.Message>` itself.
 
         flags (``int``, *optional*):
             RegEx flags.
@@ -126,7 +127,7 @@ def filter_callback_regex(pattern: str, flags=None):
         matches = [i for i in filter_.regex.finditer(callback_query.data)]
         return bool(matches)
 
-    return pyrogram.Filters.create(f, regex=re.compile(pattern, flags), name="Regex")
+    return pyrogram.filters.create(f, regex=re.compile(pattern, flags), name="Regex")
 
 
 def Backup() -> str:
@@ -253,7 +254,7 @@ def TimeFormatter(milliseconds: int) -> str:
 
 
 def DFromUToTelegramProgress(
-    current: int, total: int, msg: pyrogram.Message, text: str, start: float
+    current: int, total: int, msg: pyrogram.types.Message, text: str, start: float
 ) -> None:
     """
     Use this method to update the progress of a download from/an upload to Telegram, this method is called every 512KB.
@@ -265,7 +266,7 @@ def DFromUToTelegramProgress(
 
     total (``int``): File size in bytes.
 
-    msg (:class:`Message <pyrogram.Message>`): The Message to update while downloading/uploading the file.
+    msg (:class:`Message <pyrogram.types.Message>`): The Message to update while downloading/uploading the file.
 
     text (``str``): Text to put into the update.
 

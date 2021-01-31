@@ -8,10 +8,10 @@ last_user = None
 
 
 @pyrogram.Client.on_message(
-    pyrogram.Filters.chat(utils.config["master"])
-    & pyrogram.Filters.command("getlast", prefixes=["/", "!", "#", "."])
+    pyrogram.filters.chat(utils.config["master"])
+    & pyrogram.filters.command("getlast", prefixes=["/", "!", "#", "."])
 )
-def CmdGetLastUser(client: pyrogram.Client, msg: pyrogram.Message):
+def CmdGetLastUser(client: pyrogram.Client, msg: pyrogram.types.Message):
     global last_user
     msg.reply_text(
         text="[{0}] {1}, @{2} (#user{3})".format(
@@ -26,10 +26,10 @@ def CmdGetLastUser(client: pyrogram.Client, msg: pyrogram.Message):
 
 
 @pyrogram.Client.on_message(
-    pyrogram.Filters.chat(utils.config["master"])
-    & pyrogram.Filters.command("test", prefixes=["/", "!", "#", "."])
+    pyrogram.filters.chat(utils.config["master"])
+    & pyrogram.filters.command("test", prefixes=["/", "!", "#", "."])
 )
-def CmdTestChat(client: pyrogram.Client, msg: pyrogram.Message):
+def CmdTestChat(client: pyrogram.Client, msg: pyrogram.types.Message):
     chats_to_test = list()
     if msg.reply_to_message:
         if msg.reply_to_message.forward_from:
@@ -64,10 +64,10 @@ def CmdTestChat(client: pyrogram.Client, msg: pyrogram.Message):
 
 
 @pyrogram.Client.on_message(
-    pyrogram.Filters.user(utils.config["master"])
-    & pyrogram.Filters.command(["start", "help"], prefixes=["/", "!", "#", "."])
+    pyrogram.filters.user(utils.config["master"])
+    & pyrogram.filters.command(["start", "help"], prefixes=["/", "!", "#", "."])
 )
-def CmdStart_HelpMaster(client: pyrogram.Client, msg: pyrogram.Message):
+def CmdStart_HelpMaster(client: pyrogram.Client, msg: pyrogram.types.Message):
     msg.reply_text(
         text="""<code>/start</code> Shows this message
 
@@ -97,9 +97,9 @@ def CmdStart_HelpMaster(client: pyrogram.Client, msg: pyrogram.Message):
 
 
 @pyrogram.Client.on_message(
-    pyrogram.Filters.user(utils.config["master"]) & pyrogram.Filters.private, group=1
+    pyrogram.filters.user(utils.config["master"]) & pyrogram.filters.private, group=1
 )
-def BasicHandlerMaster(client: pyrogram.Client, msg: pyrogram.Message):
+def BasicHandlerMaster(client: pyrogram.Client, msg: pyrogram.types.Message):
     global last_user
     if msg.reply_to_message:
         if msg.reply_to_message.forward_from:
@@ -136,10 +136,10 @@ def BasicHandlerMaster(client: pyrogram.Client, msg: pyrogram.Message):
 
 
 @pyrogram.Client.on_message(
-    ~pyrogram.Filters.user(utils.config["master"])
-    & pyrogram.Filters.command(["start", "help"], prefixes=["/", "!", "#", "."])
+    ~pyrogram.filters.user(utils.config["master"])
+    & pyrogram.filters.command(["start", "help"], prefixes=["/", "!", "#", "."])
 )
-def CmdStart_HelpOthers(client: pyrogram.Client, msg: pyrogram.Message):
+def CmdStart_HelpOthers(client: pyrogram.Client, msg: pyrogram.types.Message):
     msg.reply_text(
         text=f"Hi, use this bot to talk to {client.MASTER.first_name} {client.MASTER.last_name if client.MASTER.last_name else ''}, @{client.MASTER.username if client.MASTER.username else ''} ({client.MASTER.id})",
         disable_notification=False,
@@ -147,12 +147,12 @@ def CmdStart_HelpOthers(client: pyrogram.Client, msg: pyrogram.Message):
 
 
 @pyrogram.Client.on_message(
-    ~pyrogram.Filters.user(utils.config["master"])
-    & ~pyrogram.Filters.me
-    & pyrogram.Filters.private,
+    ~pyrogram.filters.user(utils.config["master"])
+    & ~pyrogram.filters.me
+    & pyrogram.filters.private,
     group=1,
 )
-def BasicHandlerOthers(client: pyrogram.Client, msg: pyrogram.Message):
+def BasicHandlerOthers(client: pyrogram.Client, msg: pyrogram.types.Message):
     msg.forward(chat_id=utils.config["master"], disable_notification=False)
     client.send_message(
         chat_id=utils.config["master"],

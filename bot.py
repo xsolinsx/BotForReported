@@ -32,10 +32,10 @@ APP = pyrogram.Client(
     bot_token=utils.config["telegram"]["bot_api_key"],
     workers=4,
     plugins=plugins,
+    parse_mode=None,
 )
 
 APP.start()
-APP.set_parse_mode(parse_mode=None)
 APP.ME = APP.get_me()
 APP.MASTER = APP.get_chat(chat_id=utils.config["master"])
 print(
@@ -70,7 +70,7 @@ utils.scheduler.add_job(
     trigger=CronTrigger(hour=2, minute=30, jitter=600, timezone=utc),
     kwargs=dict(client=APP),
 )
-APP.idle()
+pyrogram.idle()
 APP.stop()
 
 db_management.DB.close()

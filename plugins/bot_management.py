@@ -11,10 +11,10 @@ import utils
 
 
 @pyrogram.Client.on_message(
-    pyrogram.Filters.user(utils.config["master"])
-    & pyrogram.Filters.command("reboot", prefixes=["/", "!", "#", "."])
+    pyrogram.filters.user(utils.config["master"])
+    & pyrogram.filters.command("reboot", prefixes=["/", "!", "#", "."])
 )
-def CmdReboot(client: pyrogram.Client, msg: pyrogram.Message):
+def CmdReboot(client: pyrogram.Client, msg: pyrogram.types.Message):
     python = sys.executable
     db_management.DB.close()
     os.execl(python, python, *sys.argv)
@@ -22,29 +22,32 @@ def CmdReboot(client: pyrogram.Client, msg: pyrogram.Message):
 
 
 @pyrogram.Client.on_message(
-    pyrogram.Filters.user(utils.config["master"])
-    & pyrogram.Filters.command("getip", prefixes=["/", "!", "#", "."],)
+    pyrogram.filters.user(utils.config["master"])
+    & pyrogram.filters.command(
+        "getip",
+        prefixes=["/", "!", "#", "."],
+    )
 )
-def CmdGetIP(client: pyrogram.Client, msg: pyrogram.Message):
+def CmdGetIP(client: pyrogram.Client, msg: pyrogram.types.Message):
     ip = urllib.request.urlopen("https://ipecho.net/plain").read().decode("utf8")
     msg.reply_text(text=ip)
     msg.stop_propagation()
 
 
 @pyrogram.Client.on_message(
-    pyrogram.Filters.user(utils.config["master"])
-    & pyrogram.Filters.command("backup", prefixes=["/", "!", "#", "."])
+    pyrogram.filters.user(utils.config["master"])
+    & pyrogram.filters.command("backup", prefixes=["/", "!", "#", "."])
 )
-def CmdBackup(client: pyrogram.Client, msg: pyrogram.Message):
+def CmdBackup(client: pyrogram.Client, msg: pyrogram.types.Message):
     utils.SendBackup(client=client)
     msg.stop_propagation()
 
 
 @pyrogram.Client.on_message(
-    pyrogram.Filters.user(utils.config["master"])
-    & pyrogram.Filters.command("exec", prefixes=["/", "!", "#", "."])
+    pyrogram.filters.user(utils.config["master"])
+    & pyrogram.filters.command("exec", prefixes=["/", "!", "#", "."])
 )
-def CmdExec(client: pyrogram.Client, msg: pyrogram.Message):
+def CmdExec(client: pyrogram.Client, msg: pyrogram.types.Message):
     expression = msg.text[len(msg.command[0]) + 2 :]
 
     if expression:
@@ -67,10 +70,10 @@ def CmdExec(client: pyrogram.Client, msg: pyrogram.Message):
 
 
 @pyrogram.Client.on_message(
-    pyrogram.Filters.user(utils.config["master"])
-    & pyrogram.Filters.command("eval", prefixes=["/", "!", "#", "."])
+    pyrogram.filters.user(utils.config["master"])
+    & pyrogram.filters.command("eval", prefixes=["/", "!", "#", "."])
 )
-def CmdEval(client: pyrogram.Client, msg: pyrogram.Message):
+def CmdEval(client: pyrogram.Client, msg: pyrogram.types.Message):
     expression = msg.text[len(msg.command[0]) + 2 :]
 
     if expression:
@@ -92,10 +95,10 @@ def CmdEval(client: pyrogram.Client, msg: pyrogram.Message):
 
 
 @pyrogram.Client.on_message(
-    pyrogram.Filters.chat(utils.config["master"])
-    & pyrogram.Filters.command("block", prefixes=["/", "!", "#", "."])
+    pyrogram.filters.chat(utils.config["master"])
+    & pyrogram.filters.command("block", prefixes=["/", "!", "#", "."])
 )
-def CmdBlock(client: pyrogram.Client, msg: pyrogram.Message):
+def CmdBlock(client: pyrogram.Client, msg: pyrogram.types.Message):
     users_to_block = list()
     if msg.reply_to_message:
         if msg.reply_to_message.forward_from:
@@ -127,10 +130,10 @@ def CmdBlock(client: pyrogram.Client, msg: pyrogram.Message):
 
 
 @pyrogram.Client.on_message(
-    pyrogram.Filters.chat(utils.config["master"])
-    & pyrogram.Filters.command("unblock", prefixes=["/", "!", "#", "."])
+    pyrogram.filters.chat(utils.config["master"])
+    & pyrogram.filters.command("unblock", prefixes=["/", "!", "#", "."])
 )
-def CmdUnblock(client: pyrogram.Client, msg: pyrogram.Message):
+def CmdUnblock(client: pyrogram.Client, msg: pyrogram.types.Message):
     users_to_unblock = list()
     if msg.reply_to_message:
         if msg.reply_to_message.forward_from:
