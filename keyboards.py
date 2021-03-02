@@ -3,33 +3,9 @@ import os
 import platform
 
 import pyrogram
+from pykeyboard import InlineKeyboard
 
 import utils
-
-
-def BuildKeyboard(
-    main_buttons: list, header_buttons: list = None, footer_buttons: list = None
-) -> list:
-    """
-    Build a list that can be used for an inline keyboard.
-
-    main_buttons (``list``): Main list of buttons.
-
-    header_buttons (``list``, *optional*, default = None): Buttons to place on the top of the keyboard.
-
-    footer_buttons (``list``, *optional*, default = None): Buttons to place on the bottom of the keyboard.
-
-
-    SUCCESS Returns ``list`` of buttons.
-    """
-    menu = []
-    if header_buttons:
-        menu.extend(header_buttons)
-    menu.extend(main_buttons)
-    if footer_buttons:
-        menu.extend(footer_buttons)
-
-    return menu
 
 
 def BuildPager(page: int, n_items: int, max_items_keyboard: int) -> list:
@@ -50,23 +26,22 @@ def BuildPager(page: int, n_items: int, max_items_keyboard: int) -> list:
     max_items_keyboard = int(max_items_keyboard)
     pager = list()
     if n_items > max_items_keyboard:
-        page_shift_row = list()
         if page - 2 >= 0:
             # goto first
-            page_shift_row.append(
+            pager.append(
                 pyrogram.types.InlineKeyboardButton(
                     pyrogram.emoji.LAST_TRACK_BUTTON, callback_data=f"FMpages{page}<<"
                 )
             )
         if page - 1 >= 0:
             # previous page
-            page_shift_row.append(
+            pager.append(
                 pyrogram.types.InlineKeyboardButton(
                     pyrogram.emoji.REVERSE_BUTTON, callback_data=f"FMpages{page}-"
                 )
             )
         # select page button
-        page_shift_row.append(
+        pager.append(
             pyrogram.types.InlineKeyboardButton(
                 f"{page + 1}/{math.ceil(n_items / max_items_keyboard)}",
                 callback_data="FMpages",
@@ -74,25 +49,25 @@ def BuildPager(page: int, n_items: int, max_items_keyboard: int) -> list:
         )
         if page + 1 < math.ceil(n_items / max_items_keyboard):
             # next page
-            page_shift_row.append(
+            pager.append(
                 pyrogram.types.InlineKeyboardButton(
                     pyrogram.emoji.PLAY_BUTTON, callback_data=f"FMpages{page}+"
                 )
             )
         if page + 2 < math.ceil(n_items / max_items_keyboard):
             # goto last
-            page_shift_row.append(
+            pager.append(
                 pyrogram.types.InlineKeyboardButton(
                     pyrogram.emoji.NEXT_TRACK_BUTTON, callback_data=f"FMpages{page}>>"
                 )
             )
-        pager.append(page_shift_row)
     return pager
 
 
+# TODO PAGINATION
 def BuildItemsKeyboard(
     path: str, page: int = 0, max_columns: int = 2, max_rows: int = 8
-):
+) -> InlineKeyboard:
     """
     Use this method to process items of the folder in order to create a keyboard.
 
@@ -105,7 +80,7 @@ def BuildItemsKeyboard(
     max_rows (``int``, *optional*, default = 8): Pass the maximum number of rows to insert per keyboard (6 to 100).
 
 
-    SUCCESS Returns ``list`` of items and other useful buttons.
+    SUCCESS Returns ``InlineKeyboard`` of items and other useful buttons.
 
     FAILURE Returns an error (``str``).
     """
@@ -131,72 +106,66 @@ def BuildItemsKeyboard(
         except Exception:
             items = []
 
-    header = list()
+    keyboard = InlineKeyboard()
     if path:
         if items:
-            header.append(
-                [
-                    pyrogram.types.InlineKeyboardButton(
-                        text=f"{pyrogram.emoji.OPEN_FILE_FOLDER} .",
-                        callback_data=("FMcd."),
-                    ),
-                    pyrogram.types.InlineKeyboardButton(
-                        text=f"{pyrogram.emoji.OPEN_FILE_FOLDER} ..",
-                        callback_data=("FMcd.."),
-                    ),
-                    pyrogram.types.InlineKeyboardButton(
-                        text=f"{pyrogram.emoji.OPEN_FILE_FOLDER} {pyrogram.emoji.DOWN_ARROW}",
-                        callback_data=("FMul."),
-                    ),
-                ]
+            keyboard.row(
+                pyrogram.types.InlineKeyboardButton(
+                    text=f"{pyrogram.emoji.OPEN_FILE_FOLDER} .",
+                    callback_data=("FMcd."),
+                ),
+                pyrogram.types.InlineKeyboardButton(
+                    text=f"{pyrogram.emoji.OPEN_FILE_FOLDER} ..",
+                    callback_data=("FMcd.."),
+                ),
+                pyrogram.types.InlineKeyboardButton(
+                    text=f"{pyrogram.emoji.OPEN_FILE_FOLDER} {pyrogram.emoji.DOWN_ARROW}",
+                    callback_data=("FMul."),
+                ),
             )
         else:
-            header.append(
-                [
-                    pyrogram.types.InlineKeyboardButton(
-                        text=f"{pyrogram.emoji.OPEN_FILE_FOLDER} .",
-                        callback_data=("FMcd."),
-                    ),
-                    pyrogram.types.InlineKeyboardButton(
-                        text=f"{pyrogram.emoji.OPEN_FILE_FOLDER} ..",
-                        callback_data=("FMcd.."),
-                    ),
-                ]
+            keyboard.row(
+                pyrogram.types.InlineKeyboardButton(
+                    text=f"{pyrogram.emoji.OPEN_FILE_FOLDER} .",
+                    callback_data=("FMcd."),
+                ),
+                pyrogram.types.InlineKeyboardButton(
+                    text=f"{pyrogram.emoji.OPEN_FILE_FOLDER} ..",
+                    callback_data=("FMcd.."),
+                ),
             )
 
-    keyboard = [[]]
+    tmp = list()
     for i, item in enumerate(sorted(items)):
         if i >= page * max_items_keyboard:
             if len(keyboard[-1]) >= max_columns:
                 # max_columns buttons per line, then add another row
-                keyboard.append([])
+                keyboard.row(*tmp)
+                tmp = list()
             tmp_path = os.path.abspath(os.path.join(path, item))
             if os.path.isfile(tmp_path):
-                keyboard[-1].append(
+                tmp.append(
                     pyrogram.types.InlineKeyboardButton(
                         text=pyrogram.emoji.PAGE_FACING_UP + f" {item}",
                         callback_data=f"FMul{i}",
                     )
                 )
             elif os.path.isdir(tmp_path):
-                keyboard[-1].append(
+                tmp.append(
                     pyrogram.types.InlineKeyboardButton(
                         text=pyrogram.emoji.OPEN_FILE_FOLDER + f" {item}",
                         callback_data=f"FMcd{i}",
                     )
                 )
             else:
-                keyboard[-1].append(
+                tmp.append(
                     pyrogram.types.InlineKeyboardButton(
                         text=pyrogram.emoji.QUESTION_MARK + f" {item}",
                         callback_data=f"FM{i}" if path else f"FMcddrive{i}",
                     )
                 )
-            if sum(len(row) for row in keyboard) >= max_items_keyboard:
+            if sum(len(row) for row in keyboard.inline_keyboard) >= max_items_keyboard:
                 break
 
-    footer = BuildPager(page, len(items), max_items_keyboard)
-    list_of_buttons = BuildKeyboard(
-        main_buttons=keyboard, header_buttons=header, footer_buttons=footer
-    )
-    return list_of_buttons
+    keyboard.row(BuildPager(page, len(items), max_items_keyboard))
+    return keyboard

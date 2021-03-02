@@ -1,7 +1,6 @@
 import datetime
 
 import pyrogram
-
 import utils
 
 last_user = None

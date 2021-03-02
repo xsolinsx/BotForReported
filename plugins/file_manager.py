@@ -7,9 +7,8 @@ import shutil
 import sys
 import time
 
-import pyrogram
-
 import keyboards
+import pyrogram
 import utils
 
 
@@ -20,13 +19,11 @@ def CbQryUpdateFolder(client: pyrogram.Client, cb_qry: pyrogram.types.CallbackQu
     cb_qry.answer(text="Updating folder...")
     cb_qry.edit_message_text(
         text="Path: " + utils.config["file_manager"]["path"],
-        reply_markup=pyrogram.types.InlineKeyboardMarkup(
-            keyboards.BuildItemsKeyboard(
-                path=utils.config["file_manager"]["path"],
-                page=utils.config["file_manager"]["page"],
-                max_columns=utils.config["file_manager"]["max_columns"],
-                max_rows=utils.config["file_manager"]["max_rows"],
-            )
+        reply_markup=keyboards.BuildItemsKeyboard(
+            path=utils.config["file_manager"]["path"],
+            page=utils.config["file_manager"]["page"],
+            max_columns=utils.config["file_manager"]["max_columns"],
+            max_rows=utils.config["file_manager"]["max_rows"],
         ),
     )
 
@@ -46,13 +43,11 @@ def CbQryPreviousFolder(client: pyrogram.Client, cb_qry: pyrogram.types.Callback
     cb_qry.answer(text="Moving to " + utils.config["file_manager"]["path"])
     cb_qry.edit_message_text(
         text="Path: " + utils.config["file_manager"]["path"],
-        reply_markup=pyrogram.types.InlineKeyboardMarkup(
-            keyboards.BuildItemsKeyboard(
-                path=utils.config["file_manager"]["path"],
-                page=utils.config["file_manager"]["page"],
-                max_columns=utils.config["file_manager"]["max_columns"],
-                max_rows=utils.config["file_manager"]["max_rows"],
-            )
+        reply_markup=keyboards.BuildItemsKeyboard(
+            path=utils.config["file_manager"]["path"],
+            page=utils.config["file_manager"]["page"],
+            max_columns=utils.config["file_manager"]["max_columns"],
+            max_rows=utils.config["file_manager"]["max_rows"],
         ),
     )
 
@@ -73,13 +68,11 @@ def CbQryCdDrive(client: pyrogram.Client, cb_qry: pyrogram.types.CallbackQuery):
     cb_qry.answer(text="Moving to drive " + utils.config["file_manager"]["path"])
     cb_qry.edit_message_text(
         text="Path: " + utils.config["file_manager"]["path"],
-        reply_markup=pyrogram.types.InlineKeyboardMarkup(
-            keyboards.BuildItemsKeyboard(
-                path=utils.config["file_manager"]["path"],
-                page=utils.config["file_manager"]["page"],
-                max_columns=utils.config["file_manager"]["max_columns"],
-                max_rows=utils.config["file_manager"]["max_rows"],
-            )
+        reply_markup=keyboards.BuildItemsKeyboard(
+            path=utils.config["file_manager"]["path"],
+            page=utils.config["file_manager"]["page"],
+            max_columns=utils.config["file_manager"]["max_columns"],
+            max_rows=utils.config["file_manager"]["max_rows"],
         ),
     )
 
@@ -102,13 +95,11 @@ def CbQryCdFolder(client: pyrogram.Client, cb_qry: pyrogram.types.CallbackQuery)
     cb_qry.answer(text="Moving to " + utils.config["file_manager"]["path"])
     cb_qry.edit_message_text(
         text="Path: " + utils.config["file_manager"]["path"],
-        reply_markup=pyrogram.types.InlineKeyboardMarkup(
-            keyboards.BuildItemsKeyboard(
-                path=utils.config["file_manager"]["path"],
-                page=utils.config["file_manager"]["page"],
-                max_columns=utils.config["file_manager"]["max_columns"],
-                max_rows=utils.config["file_manager"]["max_rows"],
-            )
+        reply_markup=keyboards.BuildItemsKeyboard(
+            path=utils.config["file_manager"]["path"],
+            page=utils.config["file_manager"]["page"],
+            max_columns=utils.config["file_manager"]["max_columns"],
+            max_rows=utils.config["file_manager"]["max_rows"],
         ),
     )
 
@@ -142,13 +133,11 @@ def CbQryPagesMove(client: pyrogram.Client, cb_qry: pyrogram.types.CallbackQuery
 
     cb_qry.answer(text="Turning page...")
     cb_qry.edit_message_reply_markup(
-        reply_markup=pyrogram.types.InlineKeyboardMarkup(
-            keyboards.BuildItemsKeyboard(
-                path=utils.config["file_manager"]["path"],
-                page=utils.config["file_manager"]["page"],
-                max_columns=utils.config["file_manager"]["max_columns"],
-                max_rows=utils.config["file_manager"]["max_rows"],
-            )
+        reply_markup=keyboards.BuildItemsKeyboard(
+            path=utils.config["file_manager"]["path"],
+            page=utils.config["file_manager"]["page"],
+            max_columns=utils.config["file_manager"]["max_columns"],
+            max_rows=utils.config["file_manager"]["max_rows"],
         )
     )
 
@@ -225,13 +214,11 @@ def CbQryUlFile(client: pyrogram.Client, cb_qry: pyrogram.types.CallbackQuery):
 def CmdFileManager(client: pyrogram.Client, msg: pyrogram.types.Message):
     msg.reply_text(
         text="Path: " + utils.config["file_manager"]["path"],
-        reply_markup=pyrogram.types.InlineKeyboardMarkup(
-            keyboards.BuildItemsKeyboard(
-                path=utils.config["file_manager"]["path"],
-                page=utils.config["file_manager"]["page"],
-                max_columns=utils.config["file_manager"]["max_columns"],
-                max_rows=utils.config["file_manager"]["max_rows"],
-            )
+        reply_markup=keyboards.BuildItemsKeyboard(
+            path=utils.config["file_manager"]["path"],
+            page=utils.config["file_manager"]["page"],
+            max_columns=utils.config["file_manager"]["max_columns"],
+            max_rows=utils.config["file_manager"]["max_rows"],
         ),
     )
     msg.stop_propagation()

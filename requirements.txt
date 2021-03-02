@@ -1,4 +1,5 @@
 apscheduler
-pyrogram==1.1.13
 peewee
+pykeyboard
+pyrogram==1.1.13
 tgcrypto
