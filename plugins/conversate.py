@@ -21,7 +21,6 @@ def CmdGetLastUser(client: pyrogram.Client, msg: pyrogram.types.Message):
         ),
         disable_notification=False,
     )
-    msg.stop_propagation()
 
 
 @pyrogram.Client.on_message(
@@ -59,7 +58,6 @@ def CmdTestChat(client: pyrogram.Client, msg: pyrogram.types.Message):
             txt += f"Cannot write to {cht} {ex}\n"
 
     msg.reply_text(text=txt, disable_notification=False)
-    msg.stop_propagation()
 
 
 @pyrogram.Client.on_message(
@@ -92,7 +90,6 @@ def CmdStart_HelpMaster(client: pyrogram.Client, msg: pyrogram.types.Message):
         disable_notification=False,
         parse_mode="html",
     )
-    msg.stop_propagation()
 
 
 @pyrogram.Client.on_message(
@@ -112,26 +109,28 @@ def BasicHandlerMaster(client: pyrogram.Client, msg: pyrogram.types.Message):
                     ]
                 )
             )
-    if last_user:
-        try:
-            msg.forward(chat_id=last_user.id, disable_notification=False)
-            client.send_chat_action(chat_id=utils.config["master"], action="typing")
-        except pyrogram.errors.UserIsBlocked:
+    # ignore commands
+    if msg.text[0] not in ["/", "!", "#", "."]:
+        if last_user:
+            try:
+                msg.forward(chat_id=last_user.id, disable_notification=False)
+                client.send_chat_action(chat_id=utils.config["master"], action="typing")
+            except pyrogram.errors.UserIsBlocked:
+                msg.reply_text(
+                    text=f"{last_user.id} blocked me.\n", disable_notification=False
+                )
+            except pyrogram.errors.PeerIdInvalid:
+                msg.reply_text(
+                    text=f"Cannot write to {last_user.id}, never encountered.\n",
+                    disable_notification=False,
+                )
+            except Exception as ex:
+                msg.reply_text(text=str(ex), disable_notification=False)
+        else:
             msg.reply_text(
-                text=f"{last_user.id} blocked me.\n", disable_notification=False
-            )
-        except pyrogram.errors.PeerIdInvalid:
-            msg.reply_text(
-                text=f"Cannot write to {last_user.id}, never encountered.\n",
+                text="Need to have last_user OR to reply to a forwarded message OR to reply to a message with the #user hashtag!",
                 disable_notification=False,
             )
-        except Exception as ex:
-            msg.reply_text(text=str(ex), disable_notification=False)
-    else:
-        msg.reply_text(
-            text="Need to have last_user OR to reply to a forwarded message OR to reply to a message with the #user hashtag!",
-            disable_notification=False,
-        )
 
 
 @pyrogram.Client.on_message(

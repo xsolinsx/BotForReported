@@ -221,4 +221,3 @@ def CmdFileManager(client: pyrogram.Client, msg: pyrogram.types.Message):
             max_rows=utils.config["file_manager"]["max_rows"],
         ),
     )
-    msg.stop_propagation()

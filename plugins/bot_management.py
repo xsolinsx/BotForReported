@@ -17,7 +17,6 @@ def CmdReboot(client: pyrogram.Client, msg: pyrogram.types.Message):
     python = sys.executable
     db_management.DB.close()
     os.execl(python, python, *sys.argv)
-    msg.stop_propagation()
 
 
 @pyrogram.Client.on_message(
@@ -30,7 +29,6 @@ def CmdReboot(client: pyrogram.Client, msg: pyrogram.types.Message):
 def CmdGetIP(client: pyrogram.Client, msg: pyrogram.types.Message):
     ip = urllib.request.urlopen("https://ipecho.net/plain").read().decode("utf8")
     msg.reply_text(text=ip)
-    msg.stop_propagation()
 
 
 @pyrogram.Client.on_message(
@@ -39,7 +37,6 @@ def CmdGetIP(client: pyrogram.Client, msg: pyrogram.types.Message):
 )
 def CmdBackup(client: pyrogram.Client, msg: pyrogram.types.Message):
     utils.SendBackup(client=client)
-    msg.stop_propagation()
 
 
 @pyrogram.Client.on_message(
@@ -65,7 +62,6 @@ def CmdExec(client: pyrogram.Client, msg: pyrogram.types.Message):
                 os.remove(file_name)
             else:
                 msg.reply_text(text=text)
-    msg.stop_propagation()
 
 
 @pyrogram.Client.on_message(
@@ -90,7 +86,6 @@ def CmdEval(client: pyrogram.Client, msg: pyrogram.types.Message):
                 os.remove(file_name)
             else:
                 msg.reply_text(text=text)
-    msg.stop_propagation()
 
 
 @pyrogram.Client.on_message(
@@ -125,7 +120,6 @@ def CmdBlock(client: pyrogram.Client, msg: pyrogram.types.Message):
             client.send_message(chat_id=usr.id, text="You have been blocked.")
 
     msg.reply_text(text=f"Blocked users:\n{txt}", disable_notification=False)
-    msg.stop_propagation()
 
 
 @pyrogram.Client.on_message(
@@ -160,4 +154,3 @@ def CmdUnblock(client: pyrogram.Client, msg: pyrogram.types.Message):
             client.send_message(chat_id=usr.id, text="You have been unblocked.")
 
     msg.reply_text(text=f"Unblocked users:\n{txt}", disable_notification=False)
-    msg.stop_propagation()
