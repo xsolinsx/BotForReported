@@ -1,26 +1,5 @@
-import datetime
-
 import pyrogram
 import utils
-
-last_user = None
-
-
-@pyrogram.Client.on_message(
-    pyrogram.filters.chat(utils.config["master"])
-    & pyrogram.filters.command("getlast", prefixes=["/", "!", "#", "."])
-)
-def CmdGetLastUser(client: pyrogram.Client, msg: pyrogram.types.Message):
-    global last_user
-    msg.reply_text(
-        text="[{0}] {1}, @{2} (#user{3})".format(
-            datetime.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
-            last_user.first_name,
-            last_user.username,
-            last_user.id,
-        ),
-        disable_notification=False,
-    )
 
 
 @pyrogram.Client.on_message(
@@ -67,25 +46,14 @@ def CmdTestChat(client: pyrogram.Client, msg: pyrogram.types.Message):
 def CmdStart_HelpMaster(client: pyrogram.Client, msg: pyrogram.types.Message):
     msg.reply_text(
         text="""<code>/start</code> Shows this message
-
 <code>/test {reply_from}|{chats}</code> Tests the specified chat(s)
-
-<code>/getlast</code> Sends last user's details
-
 <code>/exec</code> Executes Python3 code
-
 <code>/eval</code> Evaluates Python3 expression
-
 <code>/backup</code> Makes and sends backup
-
 <code>/reboot</code> Reboots bot
-
 <code>/getip</code> Sends server's IP
-
 <code>/block {reply_from}|{users}</code> Blocks the specified user(s)
-
 <code>/unblock {reply_from}|{users}</code> Unblocks the specified user(s)
-
 <code>/filemanager</code> Sends a file manager keyboard for the server""",
         disable_notification=False,
         parse_mode="html",
@@ -96,41 +64,29 @@ def CmdStart_HelpMaster(client: pyrogram.Client, msg: pyrogram.types.Message):
     pyrogram.filters.user(utils.config["master"]) & pyrogram.filters.private, group=1
 )
 def BasicHandlerMaster(client: pyrogram.Client, msg: pyrogram.types.Message):
-    global last_user
-    if msg.reply_to_message:
-        if msg.reply_to_message.forward_from:
-            last_user = msg.reply_to_message.forward_from
-        elif msg.reply_to_message.text.find("(#user") != -1:
-            last_user = client.get_chat(
-                chat_id=int(
-                    msg.reply_to_message.text[
-                        msg.reply_to_message.text.find("(#user")
-                        + 6 : msg.reply_to_message.text.find(")")
-                    ]
-                )
-            )
     # ignore commands
     if msg.text[0] not in ["/", "!", "#", "."]:
-        if last_user:
+        if msg.reply_to_message and msg.reply_to_message.text.find("(#user") != -1:
+            user_id = int(
+                msg.reply_to_message.text[
+                    msg.reply_to_message.text.find("(#user")
+                    + 6 : msg.reply_to_message.text.find(")")
+                ]
+            )
             try:
-                msg.forward(chat_id=last_user.id, disable_notification=False)
+                msg.forward(chat_id=user_id, disable_notification=False)
                 client.send_chat_action(chat_id=utils.config["master"], action="typing")
             except pyrogram.errors.UserIsBlocked:
                 msg.reply_text(
-                    text=f"{last_user.id} blocked me.\n", disable_notification=False
+                    text=f"{user_id} blocked me.\n", disable_notification=False
                 )
             except pyrogram.errors.PeerIdInvalid:
                 msg.reply_text(
-                    text=f"Cannot write to {last_user.id}, never encountered.\n",
+                    text=f"Cannot write to {user_id}, never encountered.\n",
                     disable_notification=False,
                 )
             except Exception as ex:
                 msg.reply_text(text=str(ex), disable_notification=False)
-        else:
-            msg.reply_text(
-                text="Need to have last_user OR to reply to a forwarded message OR to reply to a message with the #user hashtag!",
-                disable_notification=False,
-            )
 
 
 @pyrogram.Client.on_message(
