@@ -80,23 +80,22 @@ def ExtractMedia(msg: pyrogram.types.Message) -> object:
     """
     media = None
     if msg:
-        if msg.media:
-            if msg.animation:
-                media = msg.animation
-            elif msg.audio:
-                media = msg.audio
-            elif msg.document:
-                media = msg.document
-            elif msg.photo:
-                media = msg.photo
-            elif msg.sticker:
-                media = msg.sticker
-            elif msg.video:
-                media = msg.video
-            elif msg.video_note:
-                media = msg.video_note
-            elif msg.voice:
-                media = msg.voice
+        if msg.media == "animation":
+            media = msg.animation
+        elif msg.media == "audio":
+            media = msg.audio
+        elif msg.media == "document":
+            media = msg.document
+        elif msg.media == "photo":
+            media = msg.photo
+        elif msg.media == "sticker":
+            media = msg.sticker
+        elif msg.media == "video":
+            media = msg.video
+        elif msg.media == "video_note":
+            media = msg.video_note
+        elif msg.media == "voice":
+            media = msg.voice
 
     return media
 
