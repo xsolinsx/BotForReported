@@ -27,7 +27,9 @@ def CmdTestChat(client: pyrogram.Client, msg: pyrogram.types.Message):
     txt = ""
     for cht in chats_to_test:
         try:
-            client.send_chat_action(chat_id=int(cht), action="typing")
+            client.send_chat_action(
+                chat_id=int(cht), action=pyrogram.enums.chat_action.ChatAction.TYPING
+            )
             txt += f"Can write to {cht}\n"
         except pyrogram.errors.UserIsBlocked:
             txt += f"{cht} blocked me\n"
@@ -56,7 +58,7 @@ def CmdStart_HelpMaster(client: pyrogram.Client, msg: pyrogram.types.Message):
 <code>/unblock {reply_from}|{users}</code> Unblocks the specified user(s)
 <code>/filemanager</code> Sends a file manager keyboard for the server""",
         disable_notification=False,
-        parse_mode="html",
+        parse_mode=pyrogram.enums.parse_mode.ParseMode.HTML,
     )
 
 
@@ -75,7 +77,10 @@ def BasicHandlerMaster(client: pyrogram.Client, msg: pyrogram.types.Message):
             )
             try:
                 msg.forward(chat_id=user_id, disable_notification=False)
-                client.send_chat_action(chat_id=utils.config["master"], action="typing")
+                client.send_chat_action(
+                    chat_id=utils.config["master"],
+                    action=pyrogram.enums.chat_action.ChatAction.TYPING,
+                )
             except pyrogram.errors.UserIsBlocked:
                 msg.reply_text(
                     text=f"{user_id} blocked me.\n", disable_notification=False
@@ -113,4 +118,6 @@ def BasicHandlerOthers(client: pyrogram.Client, msg: pyrogram.types.Message):
         text=f"↑ (#user{msg.from_user.id}) {msg.from_user.first_name} ↑",
         disable_notification=True,
     )
-    client.send_chat_action(chat_id=msg.from_user.id, action="typing")
+    client.send_chat_action(
+        chat_id=msg.from_user.id, action=pyrogram.enums.chat_action.ChatAction.TYPING
+    )
