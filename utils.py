@@ -80,21 +80,21 @@ def ExtractMedia(msg: pyrogram.types.Message) -> object:
     """
     media = None
     if msg:
-        if msg.media == "animation":
+        if msg.media == pyrogram.enums.message_media_type.MessageMediaType.ANIMATION:
             media = msg.animation
-        elif msg.media == "audio":
+        elif msg.media == pyrogram.enums.message_media_type.MessageMediaType.AUDIO:
             media = msg.audio
-        elif msg.media == "document":
+        elif msg.media == pyrogram.enums.message_media_type.MessageMediaType.DOCUMENT:
             media = msg.document
-        elif msg.media == "photo":
+        elif msg.media == pyrogram.enums.message_media_type.MessageMediaType.PHOTO:
             media = msg.photo
-        elif msg.media == "sticker":
+        elif msg.media == pyrogram.enums.message_media_type.MessageMediaType.STICKER:
             media = msg.sticker
-        elif msg.media == "video":
+        elif msg.media == pyrogram.enums.message_media_type.MessageMediaType.VIDEO:
             media = msg.video
-        elif msg.media == "video_note":
+        elif msg.media == pyrogram.enums.message_media_type.MessageMediaType.VIDEO_NOTE:
             media = msg.video_note
-        elif msg.media == "voice":
+        elif msg.media == pyrogram.enums.message_media_type.MessageMediaType.VOICE:
             media = msg.voice
 
     return media
