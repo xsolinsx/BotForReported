@@ -14,8 +14,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from pytz import utc
 
-import db_management
-
 scheduler = BackgroundScheduler(timezone=utc)
 scheduler.start()
 
@@ -143,9 +141,6 @@ def Backup() -> str:
     # remove previous backups
     for filename in glob.glob("./backupBotForReported*"):
         os.remove(filename)
-    # compress db
-    db_management.DB.execute_sql("VACUUM")
-    db_management.DB.stop()
     backup_name = f"backupBotForReported{int(time.time())}.tar.xz"
     with tarfile.open(backup_name, mode="w:xz") as f_tar_xz:
         for folder_name, subfolders, filenames in os.walk("./"):
@@ -159,27 +154,8 @@ def Backup() -> str:
                         file_path = os.path.join(folder_name, filename)
                         print(file_path)
                         f_tar_xz.add(file_path)
-    db_management.DB.start()
 
     return backup_name
-
-
-def SendBackup(client: pyrogram.Client):
-    tmp_msg = client.send_message(
-        chat_id=config["master"],
-        text="I am preparing the automatic backup.",
-        disable_notification=True,
-    )
-
-    backup_name = Backup()
-
-    client.send_document(
-        chat_id=config["master"],
-        document=backup_name,
-        disable_notification=True,
-        progress=DFromUToTelegramProgress,
-        progress_args=(tmp_msg, "I am sending the automatic backup.", time.time()),
-    )
 
 
 def GetDrives():

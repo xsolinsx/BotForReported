@@ -36,7 +36,25 @@ def CmdGetIP(client: pyrogram.Client, msg: pyrogram.types.Message):
     & pyrogram.filters.command("backup", prefixes=["/", "!", "#", "."])
 )
 def CmdBackup(client: pyrogram.Client, msg: pyrogram.types.Message):
-    utils.SendBackup(client=client)
+    tmp_msg = client.send_message(
+        chat_id=utils.config["master"],
+        text="I am preparing the automatic backup.",
+        disable_notification=True,
+    )
+
+    # compress db
+    db_management.DB.execute_sql("VACUUM")
+    db_management.DB.stop()
+    backup_name = utils.Backup()
+    db_management.DB.start()
+
+    client.send_document(
+        chat_id=utils.config["master"],
+        document=backup_name,
+        disable_notification=True,
+        progress=utils.DFromUToTelegramProgress,
+        progress_args=(tmp_msg, "I am sending the automatic backup.", time.time()),
+    )
 
 
 @pyrogram.Client.on_message(
