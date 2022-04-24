@@ -1,5 +1,6 @@
 import pyrogram
 import utils
+from pyrogram import errors as pyrogram_errors
 
 
 @pyrogram.Client.on_message(
@@ -31,9 +32,9 @@ def CmdTestChat(client: pyrogram.Client, msg: pyrogram.types.Message):
                 chat_id=int(cht), action=pyrogram.enums.chat_action.ChatAction.TYPING
             )
             txt += f"Can write to {cht}\n"
-        except pyrogram.errors.UserIsBlocked:
+        except pyrogram_errors.UserIsBlocked:
             txt += f"{cht} blocked me\n"
-        except pyrogram.errors.PeerIdInvalid:
+        except pyrogram_errors.PeerIdInvalid:
             txt += f"Cannot write to {cht}, never encountered.\n"
         except Exception as ex:
             txt += f"Cannot write to {cht} {ex}\n"
@@ -81,11 +82,11 @@ def BasicHandlerMaster(client: pyrogram.Client, msg: pyrogram.types.Message):
                     chat_id=utils.config["master"],
                     action=pyrogram.enums.chat_action.ChatAction.TYPING,
                 )
-            except pyrogram.errors.UserIsBlocked:
+            except pyrogram_errors.UserIsBlocked:
                 msg.reply_text(
                     text=f"{user_id} blocked me.\n", disable_notification=False
                 )
-            except pyrogram.errors.PeerIdInvalid:
+            except pyrogram_errors.PeerIdInvalid:
                 msg.reply_text(
                     text=f"Cannot write to {user_id}, never encountered.\n",
                     disable_notification=False,
