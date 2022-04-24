@@ -6,10 +6,5 @@
         "page": 0,
         "max_columns": 2,
         "max_rows": 8
-    },
-    "telegram": {
-        "bot_api_key": "bot_id:key_hash",
-        "api_id": "id",
-        "api_hash": "hash"
     }
 }

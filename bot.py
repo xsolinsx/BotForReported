@@ -26,10 +26,7 @@ plugins = dict(root="plugins")
 time.sleep(1)
 
 APP = pyrogram.Client(
-    session_name="EricSolinasBot",
-    api_id=utils.config["telegram"]["api_id"],
-    api_hash=utils.config["telegram"]["api_hash"],
-    bot_token=utils.config["telegram"]["bot_api_key"],
+    name="EricSolinasBot",
     workers=4,
     plugins=plugins,
     parse_mode=pyrogram.enums.parse_mode.ParseMode.DISABLED,
