@@ -29,13 +29,14 @@ flood = dict()
 def InstantiateFloodDictionary(chat_id: int):
     # if chat_id not registered into the flood table register it
     if chat_id not in flood:
-        flood[chat_id] = {}
-        flood[chat_id]["times"] = list()
-        flood[chat_id]["flood_wait_expiry_date"] = 0
-        # from 0 to X minutes of wait depending on how much of an idiot is the user
-        flood[chat_id]["flood_wait_minutes"] = 0
-        # to know if id has been warned
-        flood[chat_id]["warned"] = False
+        flood[chat_id] = dict(
+            times=list(),
+            flood_wait_expiry_date=0,
+            # from 0 to X minutes of wait depending on how much of an idiot is the user
+            flood_wait_minutes=0,
+            # to know if id has been warned
+            warned=False,
+        )
 
 
 def CleanFloodDict():

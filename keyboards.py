@@ -104,7 +104,7 @@ def BuildItemsKeyboard(
         try:
             items = os.listdir(path)
         except Exception:
-            items = []
+            items = list()
 
     keyboard = InlineKeyboard()
     if path:

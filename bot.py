@@ -26,7 +26,7 @@ plugins = dict(root="plugins")
 time.sleep(1)
 
 APP = pyrogram.Client(
-    session_name="EricSolinasBot",
+    name="EricSolinasBot",
     api_id=utils.config["telegram"]["api_id"],
     api_hash=utils.config["telegram"]["api_hash"],
     bot_token=utils.config["telegram"]["bot_api_key"],
@@ -37,13 +37,15 @@ APP = pyrogram.Client(
 
 APP.start()
 APP.ME = APP.get_me()
+db_management.DBUser(user=APP.ME)
 APP.MASTER = APP.get_chat(chat_id=utils.config["master"])
+db_management.DBUser(user=APP.MASTER)
 print(
     start_string.format(
         bot_version=f"Pyrogram {APP.ME.first_name}", bot_data=utils.PrintUser(APP.ME)
     )
 )
-loaded_plugins = []
+loaded_plugins = list()
 for dirpath, dirnames, filenames in os.walk(APP.plugins["root"]):
     # filter out __pycache__ folders
     if "__pycache__" not in dirpath:
