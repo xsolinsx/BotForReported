@@ -1,8 +1,10 @@
 import datetime
 import json
 import logging
+import typing
 
 import peewee
+import pyrogram
 from playhouse.sqliteq import SqliteQueueDatabase
 
 DB = None
@@ -43,6 +45,23 @@ class Users(peewee.Model):
 
     class Meta:
         database = DB
+
+
+def DBUser(user: typing.Union[pyrogram.types.Chat, pyrogram.types.User]):
+    if Users.get_or_none(id=user.id):
+        Users.update(
+            first_name=user.first_name if user.first_name else "",
+            last_name=user.last_name,
+            username=user.username,
+            timestamp=datetime.datetime.utcnow(),
+        ).where(Users.id == user.id).execute()
+    else:
+        Users.create(
+            id=user.id,
+            first_name=user.first_name if user.first_name else "",
+            last_name=user.last_name,
+            username=user.username,
+        )
 
 
 DB.create_tables(models=[Users], safe=True)
