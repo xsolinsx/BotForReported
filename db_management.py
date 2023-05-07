@@ -21,6 +21,7 @@ DB = SqliteQueueDatabase(
     pragmas=[
         ("foreign_keys", 1),
         ("journal_mode", "wal"),
+        ("wal_checkpoint", "truncate"),
         ("ignore_check_constraints", 0),
         ("synchronous", "normal"),
     ],
