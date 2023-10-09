@@ -7,7 +7,7 @@ import utils
 
 @pyrogram.Client.on_message(pyrogram.filters.private, group=-1)
 def MessagesAntiFlood(client: pyrogram.Client, msg: pyrogram.types.Message):
-    if msg.from_user.id == utils.config["master"]:
+    if msg.from_user.id in (utils.config["master"], client.ME.id):
         return
 
     flooder = False
