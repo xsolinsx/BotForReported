@@ -51,7 +51,7 @@ def CbQryPreviousFolder(client: pyrogram.Client, cb_qry: pyrogram.types.Callback
         ),
     )
 
-    with open(file="utils.config.json", mode="w", encoding="utf-8") as f:
+    with open(file="config.json", mode="w", encoding="utf-8") as f:
         json.dump(utils.config, f, indent=4)
 
 
@@ -76,7 +76,7 @@ def CbQryCdDrive(client: pyrogram.Client, cb_qry: pyrogram.types.CallbackQuery):
         ),
     )
 
-    with open(file="utils.config.json", mode="w", encoding="utf-8") as f:
+    with open(file="config.json", mode="w", encoding="utf-8") as f:
         json.dump(utils.config, f, indent=4)
 
 
@@ -103,7 +103,7 @@ def CbQryCdFolder(client: pyrogram.Client, cb_qry: pyrogram.types.CallbackQuery)
         ),
     )
 
-    with open(file="utils.config.json", mode="w", encoding="utf-8") as f:
+    with open(file="config.json", mode="w", encoding="utf-8") as f:
         json.dump(utils.config, f, indent=4)
 
 
@@ -141,7 +141,7 @@ def CbQryPagesMove(client: pyrogram.Client, cb_qry: pyrogram.types.CallbackQuery
         )
     )
 
-    with open(file="utils.config.json", mode="w", encoding="utf-8") as f:
+    with open(file="config.json", mode="w", encoding="utf-8") as f:
         json.dump(utils.config, f, indent=4)
 
 
