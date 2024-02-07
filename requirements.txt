@@ -1,5 +1,5 @@
-apscheduler
-peewee
-pykeyboard
+apscheduler==3.10.4
+peewee==3.16.2
+pykeyboard==0.1.5
 pyrogram==2.0
 tgcrypto
